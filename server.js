@@ -6,7 +6,7 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Conexión a PostgreSQL (Render -> External URL)
+// Conexión sadasd a PostgreSQL (Render -> External URL)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
