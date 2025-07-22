@@ -1,0 +1,23 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Button Server</title>
+</head>
+<body>
+  <h1>Click the Button!</h1>
+  <button onclick="clickButton()">Click Me</button>
+  <p id="response"></p>
+
+  <script>
+    function clickButton() {
+      fetch('/clicked')
+        .then(res => res.text())
+        .then(data => {
+          document.getElementById('response').innerText = data;
+        });
+    }
+  </script>
+</body>
+</html>
