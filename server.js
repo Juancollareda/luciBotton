@@ -18,7 +18,7 @@ app.get('/clicked', (req, res) => {
   console.log("Button was clicked!");
   counter += 1;
   console.log(`Button clicked ${counter} times`);
-  res.send("Thanks for clicking!");
+  res.send(`Thanks for clicking! ${counter}`);
 });
 
 app.listen(PORT, () => {

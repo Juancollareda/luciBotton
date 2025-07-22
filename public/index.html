@@ -1,14 +1,43 @@
-<!-- public/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Button Server</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #f4f4f4;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #response {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
   <h1>Click the Button!</h1>
   <button onclick="clickButton()">Click Me</button>
   <p id="response"></p>
+
+  <!-- 🔊 Hidden audio element -->
+  <audio id="clickSound" src="wolol.mp3" preload="auto"></audio>
 
   <script>
     function clickButton() {
@@ -16,6 +45,11 @@
         .then(res => res.text())
         .then(data => {
           document.getElementById('response').innerText = data;
+
+          // 🔊 Play the sound
+          const sound = document.getElementById('clickSound');
+          sound.currentTime = 0; // rewind to start in case it's mid-play
+          sound.play();
         });
     }
   </script>
