@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Gift Button</title>
   <style>
     body {
@@ -58,6 +58,7 @@
   </style>
 </head>
 <body>
+   <p id="response"></p>
   <h1>Click the Luci!</h1>
 
   <button class="gif-button" onclick="clickButton()">
@@ -68,22 +69,40 @@
       allowfullscreen
     ></iframe>
   </button>
-
-  <p id="response"></p>
+<p id="response2"></p>
 
   <audio id="clickSound" src="wolol.mp3" preload="auto"></audio>
 
   <script>
+    // Fetch and update the count display
+    function updateCount() {
+      fetch('/count')
+        .then(res => res.text())
+        .then(data => {
+          document.getElementById('response').innerText = data;
+        })
+        .catch(console.error);
+    }
+
+    // Run on page load and update every second
+    window.onload = () => {
+      updateCount();
+      setInterval(updateCount, 1000);
+    };
+
+    // On button click, call /clicked and update response with sound
     function clickButton() {
       fetch('/clicked')
         .then(res => res.text())
         .then(data => {
-          document.getElementById('response').innerText = data;
+          document.getElementById('response2').innerText = data;
           const sound = document.getElementById('clickSound');
           sound.currentTime = 0;
           sound.play();
-        });
+        })
+        .catch(console.error);
     }
   </script>
 </body>
 </html>
+
