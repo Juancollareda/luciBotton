@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Button Server</title>
+  <title>Gift Button</title>
   <style>
     body {
       display: flex;
@@ -20,9 +20,22 @@
     }
 
     button {
-      padding: 10px 20px;
-      font-size: 16px;
+      background-color: gray;
+      border: none;
+      padding: 10px;
+      border-radius: 10px;
       cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #ff4081; /* Cambiá este color si querés */
+    }
+
+    button img {
+      width: 60px; /* Ajustá según el tamaño de tu GIF */
+      height: 60px;
+      object-fit: contain;
     }
 
     #response {
@@ -32,11 +45,15 @@
   </style>
 </head>
 <body>
-  <h1>Click the Button!</h1>
-  <button onclick="clickButton()">Click Me</button>
+  <h1>Click the Gift!</h1>
+
+  <!-- Botón con imagen GIF -->
+  <button onclick="clickButton()">
+    <img src="luci.gif" alt="Gift">
+  </button>
+
   <p id="response"></p>
 
-  <!-- 🔊 Hidden audio element -->
   <audio id="clickSound" src="wolol.mp3" preload="auto"></audio>
 
   <script>
@@ -45,10 +62,8 @@
         .then(res => res.text())
         .then(data => {
           document.getElementById('response').innerText = data;
-
-          // 🔊 Play the sound
           const sound = document.getElementById('clickSound');
-          sound.currentTime = 0; // rewind to start in case it's mid-play
+          sound.currentTime = 0;
           sound.play();
         });
     }
