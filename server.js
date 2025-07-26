@@ -54,7 +54,11 @@ app.get('/', (req, res) => {
 
 // Ruta de click: actualiza el contador global y por país
 app.get('/clicked', async (req, res) => {
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  // Obtener IP real y limpiar
+  let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  if (ip.includes(',')) ip = ip.split(',')[0]; // quedarse con la primera
+  if (ip.includes('::ffff:')) ip = ip.split('::ffff:')[1]; // IPv4 en formato IPv6
+
   const geo = geoip.lookup(ip);
   const countryCode = geo?.country || 'XX'; // XX si no se puede determinar
 
@@ -64,7 +68,7 @@ app.get('/clicked', async (req, res) => {
     // Suma al contador global
     await pool.query('UPDATE counter SET count = count + 1 WHERE id = 1');
 
-    // Suma o inserta el país en country_clicks
+    // Suma al contador por país
     await pool.query(`
       INSERT INTO country_clicks (country_code, clicks)
       VALUES ($1, 1)
@@ -82,7 +86,7 @@ app.get('/clicked', async (req, res) => {
   }
 });
 
-// Ruta para ver total de clicks
+
 app.get('/count', async (req, res) => {
   try {
     const result = await pool.query('SELECT count FROM counter WHERE id = 1');
@@ -93,7 +97,7 @@ app.get('/count', async (req, res) => {
   }
 });
 
-// Ruta para ver clicks por país
+
 app.get('/paises', async (req, res) => {
   try {
     const result = await pool.query(`
