@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>Luciela_dh wololo Counter</title>
   <link rel="icon" type="image/png" href="luci31.png">
-  <!-- Fuente divertida -->
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
 
   <style>
@@ -19,10 +18,24 @@
       background: linear-gradient(to right, #ff4d4d 50%, #000000 50%);
       color: #2e2e3a;
       display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+    }
+
+    .left {
+      width: 50%;
+      display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      text-align: center;
+    }
+
+    .right {
+      width: 50%;
+      padding: 40px 20px;
+      color: white;
     }
 
     h1 {
@@ -81,29 +94,74 @@
       font-size: 1rem;
       margin-top: 20px;
     }
+
+    #ranking {
+      text-align: left;
+    }
+
+    #ranking h2 {
+      color: #fff;
+      margin-bottom: 10px;
+      font-size: 1.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: white;
+    }
+
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #444;
+    }
+
+    th {
+      color: #ff4d4d;
+      text-align: left;
+    }
   </style>
 </head>
 <body>
-  <div id="response"></div>
-  <h1>Global wololo Counter</h1>
+  <div class="left">
+    <div id="response"></div>
+    <h1>Global wololo Counter</h1>
 
-  <button class="gif-button" onclick="clickButton()">
-    <iframe
-      class="gif-frame"
-      src="https://tenor.com/embed/3844763473770429709"
-      title="Tenor GIF"
-      allowfullscreen
-    ></iframe>
-  </button>
+    <button class="gif-button" onclick="clickButton()">
+      <iframe
+        class="gif-frame"
+        src="https://tenor.com/embed/3844763473770429709"
+        title="Tenor GIF"
+        allowfullscreen
+      ></iframe>
+    </button>
 
-  <div id="response2"></div>
+    <div id="response2"></div>
 
-  <footer>
-    Subscribe to <a href="https://www.twitch.tv/luciela_dh" target="_blank">Luciela_dh</a><br />
-    Created by <a href="" target="_blank">bye_nary01010</a>
-  </footer>
+    <footer>
+      Subscribe to <a href="https://www.twitch.tv/luciela_dh" target="_blank">Luciela_dh</a><br />
+      Created by <a href="" target="_blank">bye_nary01010</a>
+    </footer>
 
-  <audio id="clickSound" src="wolol.mp3" preload="auto"></audio>
+    <audio id="clickSound" src="wolol.mp3" preload="auto"></audio>
+  </div>
+
+  <div class="right">
+    <div id="ranking">
+      <h2>Ranking by country</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Country</th>
+            <th>Clicks</th>
+          </tr>
+        </thead>
+        <tbody id="rankingBody">
+       
+        </tbody>
+      </table>
+    </div>
+  </div>
 
   <script>
     function updateCount() {
@@ -115,10 +173,20 @@
         .catch(console.error);
     }
 
-    window.onload = () => {
-      updateCount();
-      setInterval(updateCount, 1000);
-    };
+    function updateRanking() {
+      fetch('/paises')
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.getElementById('rankingBody');
+          tbody.innerHTML = '';
+          data.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${row.country_code}</td><td>${row.clicks}</td>`;
+            tbody.appendChild(tr);
+          });
+        })
+        .catch(console.error);
+    }
 
     function clickButton() {
       fetch('/clicked')
@@ -128,9 +196,17 @@
           const sound = document.getElementById('clickSound');
           sound.currentTime = 0;
           sound.play();
+          updateRanking(); // Actualiza después de un clic
         })
         .catch(console.error);
     }
+
+    window.onload = () => {
+      updateCount();
+      updateRanking();
+      setInterval(updateCount, 1000);
+      setInterval(updateRanking, 5000);
+    };
   </script>
 </body>
 </html>
