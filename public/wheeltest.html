@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cyber Music Wheel</title>
+  <style>
+    :root {
+      --main-color: #e50914;
+      --bg-color: #0b0b0b;
+      --text-color: #fff;
+      --inactive-color: #555;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg-color);
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+.wheel-wrapper {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%); /* Stick to left side vertically centered */
+  width: 350px;
+  height: 700px;
+  overflow: hidden;
+  clip-path: inset(0 0 0 50%);
+}
+
+   .wheel {
+  position: absolute;
+  top: 0;
+  left: -350px; /* shift the circle so the right half is visible */
+  width: 700px;
+  height: 700px;
+  border-radius: 50%;
+  transition: transform 0.1s ease-out;
+  cursor: grab;
+}
+
+    .item {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: center center;
+      /* Rotate to position, then counter-rotate to keep text upright */
+      transform: rotate(calc(var(--angle) * 1deg)) translate(0, -300px) rotate(calc(var(--angle) * -1deg));
+      text-align: center;
+      font-size: 14px;
+      width: 100px;
+      margin-left: -50px;
+      color: var(--inactive-color);
+      transition: all 0.2s ease-in-out;
+      opacity: 0.6;
+    }
+
+    .item.active {
+      color: var(--main-color);
+      font-weight: bold;
+      font-size: 16px;
+      opacity: 1;
+      text-shadow: 0 0 8px var(--main-color);
+    }
+
+    #player-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      right: auto;
+      transform: translate(-50%, -50%); /* Center horizontally and vertically */
+      z-index: 10;
+      width: 560px;
+      height: 315px;
+      background-color: #000;
+      box-shadow: 0 0 20px #e50914;
+      border: 2px solid var(--main-color);
+    }
+
+    #youtube-player {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .selector-line {
+      position: absolute;
+      top: 50%;
+      left: 100%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .selector-line.highlight {
+      /* Remove color from container, apply to arrow only */
+      /* No effect here, handled below */
+    }
+    #arrow {
+      font-size: 32px;
+      color: var(--inactive-color);
+      transition: color 0.2s, text-shadow 0.2s;
+    }
+    .selector-line.highlight #arrow {
+      color: var(--main-color);
+      text-shadow: 0 0 10px var(--main-color);
+    }
+  </style>
+</head>
+<body>
+
+<div class="wheel-wrapper">
+  <div class="selector-line" id="selector">
+    <span id="selected-title">◀</span>
+    <span id="arrow">◀</span>
+  </div>
+  <div class="wheel" id="wheel"></div>
+</div>
+
+<div id="player-container">
+  <iframe id="youtube-player"
+          src=""
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+  </iframe>
+</div>
+
+<script>
+  const wheel = document.getElementById('wheel');
+  const selector = document.getElementById('selector');
+  const songs = [
+    { name: ' Identity / アイデンティティ', youtubeId: 'aJhDzTSgHUc' },
+    { name: ' Stay with me / 真夜中のドア', youtubeId: 'Qim7Netvj8g' },
+    { name: 'Aishite Aishite Aishite ', youtubeId: '_N79-wCZdzk' },
+    { name: 'Suffering', youtubeId: 'CzhQ7sIoLNk' },
+    { name: 'Have Yourself a Merry Little Christma', youtubeId: 'M1RwKrLrC7c' },
+    { name: ' World Is Mine ワールドイズマイン', youtubeId: '07SsBxdLuWE' },
+    { name: 'Omae Wa Mou / Already Dead ', youtubeId: 'iKigQJBj8vw' },
+    { name: 'Down By The River', youtubeId: 'tYk0FBBF2Y0' },
+    { name: 'Shinunoga E-WA', youtubeId: '8Mp6sTk1K8Q' }
+  ];
+
+  const count = songs.length;
+  const anglePerItem = 360 / count;
+  let wheelScrollTimeout;
+  const selectorAngle = 90; // Center of right half-circle (90deg)
+
+  // Create wheel items
+  songs.forEach((song, i) => {
+    const angle = anglePerItem * i;
+    const item = document.createElement('div');
+    item.className = 'item';
+    item.dataset.index = i;
+    item.style.setProperty('--angle', angle);
+    item.textContent = song.name;
+    wheel.appendChild(item);
+  });
+
+  let isDragging = false;
+  let startX = 0;
+  let currentRotation = 0;
+
+  wheel.addEventListener('mousedown', e => {
+    isDragging = true;
+    startX = e.clientX;
+    wheel.style.cursor = 'grabbing';
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const deltaX = e.clientX - startX;
+    const tempRotation = currentRotation + deltaX;
+    wheel.style.transform = `rotate(${tempRotation}deg)`;
+    updateItemTransforms(tempRotation);
+  });
+
+  document.addEventListener('mouseup', e => {
+    if (!isDragging) return;
+    const deltaX = e.clientX - startX;
+    currentRotation += deltaX;
+    isDragging = false;
+    wheel.style.cursor = 'grab';
+    snapToClosest();
+    updateItemTransforms(currentRotation);
+  });
+
+  function snapToClosest() {
+    const index = getClosestItemIndex(currentRotation);
+    currentRotation = selectorAngle - index * anglePerItem;
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+    updateItemTransforms(currentRotation);
+    updateVideoBasedOnRotation(currentRotation);
+  }
+
+  // Scroll con mouse
+  wheel.addEventListener('wheel', e => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 15 : -15;
+    currentRotation += delta;
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+    updateItemTransforms(currentRotation);
+    updateVideoBasedOnRotation(currentRotation);
+
+    clearTimeout(wheelScrollTimeout);
+    wheelScrollTimeout = setTimeout(snapToClosest, 150);
+  });
+
+  function updateVideoBasedOnRotation(rotation) {
+    const index = getClosestItemIndex(rotation);
+    const selectedSong = songs[index];
+    const player = document.getElementById('youtube-player');
+    player.src = `https://www.youtube.com/embed/${selectedSong.youtubeId}?autoplay=1`;
+    highlightActiveItem(index);
+    // Align the title with the arrow
+    const titleSpan = document.getElementById('selected-title');
+    titleSpan.style.color = 'var(--main-color)';
+    titleSpan.style.fontWeight = 'bold';
+    titleSpan.style.fontSize = '18px';
+    // selectorAngle is where the arrow is (center of right semicircle, 90deg)
+    selector.classList.add('highlight');
+  }
+
+  function highlightActiveItem(index) {
+    const items = document.querySelectorAll('.item');
+    items.forEach((item, i) => {
+      item.classList.remove('active');
+      // Show arrow and text for all items
+      if (i === index) {
+        item.classList.add('active');
+        item.innerHTML = '<span style="color: var(--main-color); font-size: 20px; vertical-align: middle;"></span> ' + songs[i].name;
+      } else {
+        item.innerHTML = '<span style="color: var(--inactive-color); font-size: 20px; vertical-align: middle;"></span> ' + songs[i].name;
+      }
+    });
+    // Arrow glow is handled in updateVideoBasedOnRotation
+  }
+
+  function getClosestItemIndex(rotation) {
+    // selectorAngle is where the arrow is (center of right semicircle, 90deg)
+    let normalized = ((selectorAngle - rotation) % 360 + 360) % 360;
+    let index = Math.round(normalized / anglePerItem) % songs.length;
+    return index;
+  }
+
+  function getSelectorAngle() {
+  // No longer needed, selectorAngle is fixed at 270deg (top center)
+  return selectorAngle;
+}
+
+  function updateItemTransforms(rotation) {
+    document.querySelectorAll('.item').forEach((item, i) => {
+      const angle = anglePerItem * i;
+      // Space items evenly and keep text upright
+      item.style.transform =
+        `rotate(${angle}deg) translate(0, -280px) rotate(${-angle - rotation}deg)`;
+    });
+  }
+
+// Call this function whenever the wheel rotates:
+wheel.style.transform = `rotate(${currentRotation}deg)`;
+updateItemTransforms(currentRotation);
+
+// Also call updateItemTransforms in mousemove, mouseup, wheel, and snapToClosest
+
+  updateVideoBasedOnRotation(0); // init
+</script>
+
+</body>
+</html>
