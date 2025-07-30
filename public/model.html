@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Character Viewer</title>
+  <link rel="stylesheet" href="card.css">
+</head>
+<body>
+  <div class="card-container">
+    <div class="card">
+      <!-- Contenido principal -->
+      <img id="characterImage" src="image1.png" alt="Character">
+      <h2 id="characterTitle"></h2>
+      <p id="characterDesc"></p>
+
+      <div class="arrows">
+        <button onclick="prevImage()">←</button>
+        <button onclick="nextImage()">→</button>
+      </div>
+
+      <!-- Credits Tab dentro de la tarjeta -->
+      <div class="credits-tab">
+        <div class="tab-label">Credits</div>
+        <div class="credits-content">
+          <div class="credit">
+            <a href="https://x.com/Mengyingo" target="_blank">
+        
+            <img src="arist.jpg" alt="Artist">
+            </a>
+            <p><strong>Artist</strong><br>Mengyingo</p>
+          </div>
+          <div class="credit">
+            <a href="https://x.com/DevilishNu" target="_blank">
+            <img src="rigger.jpg" alt="Rigger">
+            </a>
+            <p><strong>Rigger</strong><br>DevilishNu</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="cardcode.js"></script>
+</body>
+</html>
