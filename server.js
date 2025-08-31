@@ -92,8 +92,8 @@ app.get('/count', async (req, res) => {
     const result = await pool.query('SELECT count FROM counter WHERE id = 1');
     res.send(`Button has been clicked ${result.rows[0].count} times`);
   } catch (err) {
-    console.error('Error al obtener contador:', err);
-    res.status(500).send('Error al obtener contador');
+    console.error('cant find counter :', err);
+    res.status(500).send('cant find counter file');
   }
 });
 
