@@ -36,21 +36,23 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
-// Ruta de click
 app.get('/clicked', (req, res) => {
-  let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  // Get IP
+  app.set('trust proxy', true); // allow Express to trust x-forwarded-for
+  let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || "";
+
   if (ip.includes(',')) ip = ip.split(',')[0];
   if (ip.includes('::ffff:')) ip = ip.split('::ffff:')[1];
 
-  const geo = geoip.lookup(ip);
-  const countryCode = geo?.country || 'XX';
+  // Lookup country
+  const geo = geoip.lookup(process.env.TEST_IP || ip);
+  const countryCode = geo?.country || "XX";
 
   console.log(`Click desde IP: ${ip} (País: ${countryCode})`);
 
   // Update counters
   data.count += 1;
   data.countries[countryCode] = (data.countries[countryCode] || 0) + 1;
-
   saveData(data);
 
   res.send(`thanks for clicking. Total: ${data.count}`);
