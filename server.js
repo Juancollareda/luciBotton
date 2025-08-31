@@ -25,11 +25,14 @@ function loadData() {
 
 // Save data to file
 function saveData(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data));
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2)); // pretty JSON
 }
 
 // Global in-memory data
 let data = loadData();
+
+// trust proxy once at the start
+app.set('trust proxy', true);
 
 // Ruta principal
 app.get('/', (req, res) => {
@@ -38,15 +41,25 @@ app.get('/', (req, res) => {
 
 app.get('/clicked', (req, res) => {
   // Get IP
-  app.set('trust proxy', true); // allow Express to trust x-forwarded-for
   let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || "";
 
   if (ip.includes(',')) ip = ip.split(',')[0];
   if (ip.includes('::ffff:')) ip = ip.split('::ffff:')[1];
 
-  // Lookup country
-  const geo = geoip.lookup(process.env.TEST_IP || ip);
-  const countryCode = geo?.country || "XX";
+  // Detect localhost / private IPs
+  let countryCode;
+  if (
+    ip === "127.0.0.1" ||
+    ip === "::1" ||
+    ip.startsWith("192.168.") ||
+    ip.startsWith("10.") ||
+    ip.startsWith("172.16.")
+  ) {
+    countryCode = "LOCALSERVER";
+  } else {
+    const geo = geoip.lookup(process.env.TEST_IP || ip);
+    countryCode = geo?.country || "XX";
+  }
 
   console.log(`Click desde IP: ${ip} (País: ${countryCode})`);
 
