@@ -1,91 +1,119 @@
 const express = require('express');
 const path = require('path');
+const { Pool } = require('pg');
 const geoip = require('geoip-lite');
-const fs = require('fs');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Conexión a PostgreSQL (Render -> External URL)
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false // necesario para Render
+  }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
-// File where we store data
-const DATA_FILE = path.join(__dirname, 'data.txt');
+// Inicializa tablas si no existen
+async function initializeCounterTable() {
+  try {
+    // Tabla principal de contador global
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS counter (
+        id SERIAL PRIMARY KEY,
+        count INTEGER NOT NULL DEFAULT 0
+      );
+    `);
 
-// Load data from file or set defaults
-function loadData() {
-  if (fs.existsSync(DATA_FILE)) {
-    try {
-      return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-    } catch (e) {
-      console.error("Error parsing data.txt, resetting...");
+    const result = await pool.query('SELECT * FROM counter');
+    if (result.rows.length === 0) {
+      await pool.query('INSERT INTO counter (count) VALUES (0)');
+      console.log("Tabla 'counter' inicializada con count = 0");
     }
+
+    // Tabla para contar por país
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS country_clicks (
+        id SERIAL PRIMARY KEY,
+        country_code TEXT NOT NULL UNIQUE,
+        clicks INTEGER NOT NULL DEFAULT 1
+      );
+    `);
+  } catch (err) {
+    console.error("Error inicializando tablas:", err);
   }
-  return { count: 0, countries: {} };
 }
-
-// Save data to file
-function saveData(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2)); // pretty JSON
-}
-
-// Global in-memory data
-let data = loadData();
-
-// trust proxy once at the start
-app.set('trust proxy', true);
 
 // Ruta principal
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
-app.get('/clicked', (req, res) => {
-  // Get IP
-  let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || "";
+// Ruta de click: actualiza el contador global y por país
+app.get('/clicked', async (req, res) => {
+  // Obtener IP real y limpiar
+  let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  if (ip.includes(',')) ip = ip.split(',')[0]; // quedarse con la primera
+  if (ip.includes('::ffff:')) ip = ip.split('::ffff:')[1]; // IPv4 en formato IPv6
 
-  if (ip.includes(',')) ip = ip.split(',')[0];
-  if (ip.includes('::ffff:')) ip = ip.split('::ffff:')[1];
-
-  // Detect localhost / private IPs
-  let countryCode;
-  if (
-    ip === "127.0.0.1" ||
-    ip === "::1" ||
-    ip.startsWith("192.168.") ||
-    ip.startsWith("10.") ||
-    ip.startsWith("172.16.")
-  ) {
-    countryCode = "LOCALSERVER";
-  } else {
-    const geo = geoip.lookup(process.env.TEST_IP || ip);
-    countryCode = geo?.country || "XX";
-  }
+  const geo = geoip.lookup(ip);
+  const countryCode = geo?.country || 'XX'; // XX si no se puede determinar
 
   console.log(`Click desde IP: ${ip} (País: ${countryCode})`);
 
-  // Update counters
-  data.count += 1;
-  data.countries[countryCode] = (data.countries[countryCode] || 0) + 1;
-  saveData(data);
+  try {
+    // Suma al contador global
+    await pool.query('UPDATE counter SET count = count + 1 WHERE id = 1');
 
-  res.send(`thanks for clicking. Total: ${data.count}`);
+    // Suma al contador por país
+    await pool.query(`
+      INSERT INTO country_clicks (country_code, clicks)
+      VALUES ($1, 1)
+      ON CONFLICT (country_code)
+      DO UPDATE SET clicks = country_clicks.clicks + 1;
+    `, [countryCode]);
+
+    const result = await pool.query('SELECT count FROM counter WHERE id = 1');
+    const newCount = result.rows[0].count;
+
+    res.send(`thanks for clicking. Total: ${newCount}`);
+  } catch (err) {
+    console.error('Error al actualizar:', err);
+    res.status(500).send('Error al actualizar');
+  }
 });
 
-// Ruta de contador global
-app.get('/count', (req, res) => {
-  res.send(`Button has been clicked ${data.count} times`);
+
+app.get('/count', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT count FROM counter WHERE id = 1');
+    res.send(`Button has been clicked ${result.rows[0].count} times`);
+  } catch (err) {
+    console.error('Error al obtener contador:', err);
+    res.status(500).send('Error al obtener contador');
+  }
 });
 
-// Ruta clicks por país
-app.get('/paises', (req, res) => {
-  const sorted = Object.entries(data.countries)
-    .map(([country, clicks]) => ({ country, clicks }))
-    .sort((a, b) => b.clicks - a.clicks);
 
-  res.json(sorted);
+app.get('/paises', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT country_code, clicks
+      FROM country_clicks
+      ORDER BY clicks DESC
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error al obtener clicks por país:', err);
+    res.status(500).send('Error al obtener clicks por país');
+  }
 });
 
 // Iniciar servidor
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
+  await initializeCounterTable();
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
