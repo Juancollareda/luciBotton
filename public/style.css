@@ -45,32 +45,34 @@
     }
 
     .gif-button {
-      background-color: transparent;
-      border: none;
-      border-radius: 16px;
-      cursor: pointer;
-      overflow: hidden;
-      width: 220px;
-      height: 220px;
-      transition: filter 0.3s ease;
-      filter: grayscale(100%);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      margin: 20px 0;
-      padding: 0;
-    }
+  background-color: transparent;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  overflow: hidden;
+  /* Remove fixed width/height so it adapts to image size */
+  width: auto;
+  height: auto;
+  transition: filter 0.3s ease;
+  filter: grayscale(100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  margin: 20px 0;
+  padding: 0;
+  display: inline-block;
+}
 
     .gif-button:hover {
       filter: grayscale(0%);
     }
 
     .gif-frame {
-      width: 110%;
-      height: 110%;
-      border: none;
-      object-fit: fill;
-      display: block;
-      pointer-events: none;
-    }
+  max-width: 220px;   /* limit size, but keep proportions */
+  height: auto;
+  border-radius: 16px;
+  display: block;
+  pointer-events: none;
+  object-fit: contain; /* keeps PNG aspect ratio */
+}
 
     #response2 {
       font-size: 1.5rem;

@@ -14,15 +14,27 @@
     <h1>Global wololo Counter</h1>
 
     <button class="gif-button" onclick="clickButton()">
-      <iframe
-        class="gif-frame"
-        src="https://tenor.com/embed/3844763473770429709"
-        title="Tenor GIF"
-        allowfullscreen
-      ></iframe>
+      <img
+        alt="Click Me"
+        src="https://media1.tenor.com/m/NVtYAkt7vQ0AAAAC/lucieladh-yipee-luci.gif"
+        class="gif-image"
+      />
     </button>
 
     <div id="response2"></div>
+    <!--Click button (make it droppable) 
+<div id="clickButtonDrop" ondrop="dropAutoclicker(event)" ondragover="allowDrop(event)">
+  <button class="gif-button" id="mainClickButton" onclick="clickButton()">
+    <img
+      class="gif-frame"
+      src="bunbat clicker.png"
+      alt="Tenor GIF"
+    />
+  </button>
+</div>
+
+  </button>
+</div>-->
 
     <footer>
       Subscribe to <a href="https://www.twitch.tv/luciela_dh" target="_blank">Luciela_dh</a><br />
@@ -34,12 +46,11 @@
     <audio id="clickSound" src="wolol.mp3" preload="auto"></audio>
 
     <button id="missileButton" class="gif-button" onclick="launchMissile()" disabled>
-      <iframe
-        class="gif-frame"
-        src="https://giphy.com/embed/zK5EHMbtwfW1O"
-        title="Missile GIF"
-        allowfullscreen
-      ></iframe>
+        <img 
+    src="bunbat missil.png" 
+    alt="Missile" 
+    style="width:120px; height:auto; border-radius:10px;" 
+  />
     </button>
 
     <div id="missileStatus" style="margin-top:10px; font-size:1.2rem; color:#ffdd00;"></div>
@@ -60,7 +71,13 @@
 
   <div class="right">
     <div id="boostTimer">Boost: OFF</div>
-
+<!-- Autoclicker menu item 
+<div id="autoclickerMenu" style="margin-top:20px;">
+  <div id="autoclickerItem" draggable="true" 
+       style="width:100px; padding:10px; background:#4CAF50; color:white; text-align:center; cursor:grab; border-radius:10px;">
+    Autoclicker
+  </div>
+</div>-->
     <div id="ranking">
       <h2>Ranking by country</h2>
       <table>
