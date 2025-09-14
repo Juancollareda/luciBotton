@@ -292,6 +292,48 @@ app.post('/reset-missile', async (req, res) => {
   }
 });
 
+// Endpoint to reset missile cooldown for a specific country
+app.post('/reset-missile-cooldown', async (req, res) => {
+  const { password, country_code } = req.query;
+
+  // Check admin password
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(403).send('Access denied. Wrong password.');
+  }
+
+  if (!country_code) {
+    return res.status(400).send('Missing country_code');
+  }
+
+  try {
+    // Reset the missile cooldown for the specified country
+    const result = await pool.query(`
+      INSERT INTO country_missiles (country_code, last_missile)
+      VALUES ($1, NULL)
+      ON CONFLICT (country_code) DO UPDATE SET last_missile = NULL
+    `, [country_code.toUpperCase()]);
+
+    res.send(`Missile cooldown for ${country_code.toUpperCase()} has been reset.`);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error resetting missile cooldown.');
+  }
+});
+// Endpoint to get all countries with missile cooldown
+app.get('/missile-cooldowns', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT country_code, last_missile
+      FROM country_missiles
+      WHERE last_missile IS NOT NULL
+      ORDER BY last_missile DESC
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error fetching missile cooldown data');
+  }
+});
 app.listen(PORT, async () => {
   await initializeCounterTable();
   console.log(`Servidor corriendo en http://localhost:${PORT}`);

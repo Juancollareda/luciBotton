@@ -57,6 +57,32 @@
     }
 
     button.deleteBtn:hover { background-color: #c82333; }
+
+    /* New section for resetting missile cooldown by country */
+    #resetCountrySection {
+      margin-top: 20px;
+    }
+
+    #countryCodeInput {
+      padding: 10px;
+      font-size: 16px;
+      width: 150px;
+      margin-right: 10px;
+    }
+
+    #resetCountryBtn {
+      font-size: 16px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #resetCountryBtn:hover {
+      background-color: #0056b3;
+    }
   </style>
 </head>
 <body>
@@ -78,9 +104,18 @@
     <tbody id="countryTable"></tbody>
   </table>
 
+  <!-- New Section to Reset Missile Cooldown by Country -->
+  <div id="resetCountrySection">
+    <h3>Reset Missile Cooldown by Country</h3>
+    <input type="text" id="countryCodeInput" placeholder="Country Code (e.g., US)">
+    <button id="resetCountryBtn">Reset Cooldown</button>
+  </div>
+
   <script>
     const boostBtn = document.getElementById('boostBtn');
     const resetMissileBtn = document.getElementById('resetMissileBtn');
+    const resetCountryBtn = document.getElementById('resetCountryBtn');
+    const countryCodeInput = document.getElementById('countryCodeInput');
     const statusEl = document.getElementById('status');
     const countryTable = document.getElementById('countryTable');
     const ADMIN_PASSWORD = "supersecret123123ret123123";
@@ -129,6 +164,23 @@
         setTimeout(() => resetMissileBtn.textContent = 'Reset Missile Cooldown', 2000);
       } catch (err) {
         alert('Error resetting missile cooldown');
+      }
+    });
+
+    // --- Reset missile cooldown for specific country ---
+    resetCountryBtn.addEventListener('click', async () => {
+      const countryCode = countryCodeInput.value.trim().toUpperCase();
+      if (!countryCode) {
+        alert('Please enter a country code');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/reset-missile-cooldown?password=${ADMIN_PASSWORD}&country_code=${countryCode}`, { method: 'POST' });
+        const text = await res.text();
+        alert(text);
+      } catch (err) {
+        alert('Error resetting missile cooldown for the specified country');
       }
     });
 
@@ -197,4 +249,3 @@
   </script>
 </body>
 </html>
-  
