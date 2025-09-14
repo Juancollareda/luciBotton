@@ -181,90 +181,96 @@ app.patch('/adjust-click', async (req, res) => {
 // Missile endpoints remain unchanged
 // ...
 app.post('/missile', async (req, res) => {
-  let ip = getIP(req);
+  const ip = getIP(req);
   const geo = geoip.lookup(ip);
-  let countryCode = geo?.country || 'XX';
+  const userCountry = geo?.country || 'XX'; // this country gets the cooldown
 
-  // Allow admin override target
-  if (req.query.target) {
-  countryCode = req.query.target.toUpperCase();
-}
+  const targetCountry = req.query.target ? req.query.target.toUpperCase() : null; // country that receives missile
 
   let amount = parseInt(req.query.amount);
   if (isNaN(amount) || amount <= 0) return res.status(400).send('Invalid amount');
+  if (!targetCountry) return res.status(400).send('Missing target country');
 
   try {
-    const countryRes = await pool.query(
-      'SELECT clicks FROM country_clicks WHERE country_code = $1',
-      [countryCode]
-    );
-    if (!countryRes.rows.length) return res.status(404).send(`No clicks recorded for ${countryCode}`);
-
-    const { clicks } = countryRes.rows[0];
-
+    // Check cooldown for the user’s country
     const missileRes = await pool.query(
       'SELECT last_missile FROM country_missiles WHERE country_code = $1',
-      [countryCode]
+      [userCountry]
     );
 
     const now = new Date();
     if (missileRes.rows.length > 0 && missileRes.rows[0].last_missile) {
       const last = new Date(missileRes.rows[0].last_missile);
       if ((now - last) < 24*60*60*1000) {
-        return res.status(403).send(`Country ${countryCode} can only launch a missile once per day.`);
+        return res.status(403).send(`Your country ${userCountry} can only launch a missile once per day.`);
       }
     }
 
+    // Apply missile effect to the target
+    const countryRes = await pool.query(
+      'SELECT clicks FROM country_clicks WHERE country_code = $1',
+      [targetCountry]
+    );
+    if (!countryRes.rows.length) return res.status(404).send(`No clicks recorded for ${targetCountry}`);
+
+    const { clicks } = countryRes.rows[0];
     const newClicks = Math.max(0, clicks - amount);
-    await pool.query('UPDATE country_clicks SET clicks = $1 WHERE country_code = $2', [newClicks, countryCode]);
+    await pool.query('UPDATE country_clicks SET clicks = $1 WHERE country_code = $2', [newClicks, targetCountry]);
 
     const diff = clicks - newClicks;
     if (diff > 0) {
       await pool.query('UPDATE counter SET count = count - $1 WHERE id = 1', [diff]);
     }
 
+    // Set cooldown for the clicker’s country
     await pool.query(`
       INSERT INTO country_missiles (country_code, last_missile)
       VALUES ($1, $2)
       ON CONFLICT (country_code) DO UPDATE SET last_missile = $2
-    `, [countryCode, now]);
+    `, [userCountry, now]);
 
-    res.send(`Missile applied! ${diff} clicks subtracted from ${countryCode}`);
+    res.send(`Missile applied! ${diff} clicks subtracted from ${targetCountry}`);
   } catch (err) {
     console.error(err);
     res.status(500).send('Error applying missile');
   }
 });
+
 app.get('/missile-status', async (req, res) => {
   try {
-    let countryCode = req.query.target ? req.query.target.toUpperCase() : geoip.lookup(getIP(req))?.country || 'XX';
+    const ip = getIP(req);
+    const geo = geoip.lookup(ip);
+    const userCountry = geo?.country || 'XX'; // check cooldown for clicker
 
     const missileRes = await pool.query(
       'SELECT last_missile FROM country_missiles WHERE country_code = $1',
-      [countryCode]
+      [userCountry]
     );
-
-    const now = new Date();
 
     if (!missileRes.rows.length || !missileRes.rows[0].last_missile) {
       return res.json({ canLaunch: true });
     }
 
-    const last = new Date(missileRes.rows[0].last_missile);
-    const diff = now - last;
+    const lastMs = new Date(missileRes.rows[0].last_missile).getTime();
+    const diff = Date.now() - lastMs;
+    const cooldown = 24 * 60 * 60 * 1000;
 
-    if (diff >= 24*60*60*1000) {
-      res.json({ canLaunch: true });
+    if (diff >= cooldown) {
+      return res.json({ canLaunch: true });
     } else {
-      const hours = Math.floor((24*60*60*1000 - diff) / (1000*60*60));
-      const minutes = Math.floor(((24*60*60*1000 - diff) % (1000*60*60)) / (1000*60));
-      res.json({ canLaunch: false, hours, minutes });
+      const remainingMs = cooldown - diff;
+      const hours = Math.floor(remainingMs / (1000*60*60));
+      const minutes = Math.floor((remainingMs % (1000*60*60)) / (1000*60));
+      const seconds = Math.floor((remainingMs % (1000*60)) / 1000);
+      return res.json({ canLaunch: false, hours, minutes, seconds });
     }
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ canLaunch: false });
   }
 });
+
 // --- FIXED reset-missile endpoint ---
 app.post('/reset-missile', async (req, res) => {
   const { password, country_code } = req.query;
