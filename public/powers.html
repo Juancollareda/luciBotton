@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Activate Boost</title>
+  <title>Activate Boost & Manage Countries</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,61 +11,92 @@
       background-color: #f9f9f9;
     }
 
-    #boostBtn {
+    #boostBtn, #resetMissileBtn {
       font-size: 20px;
       padding: 15px 30px;
       cursor: pointer;
-      background-color: #28a745;
       color: white;
       border: none;
       border-radius: 5px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
       transition: transform 0.2s, background-color 0.2s;
+      margin: 10px;
     }
 
-    #boostBtn:hover {
-      background-color: #218838;
-      transform: scale(1.05);
+    #boostBtn { background-color: #28a745; }
+    #boostBtn:hover { background-color: #218838; transform: scale(1.05); }
+    #boostBtn.active { background-color: #007bff; }
+
+    #resetMissileBtn { background-color: #ffc107; color: black; }
+    #resetMissileBtn:hover { background-color: #e0a800; transform: scale(1.05); }
+
+    #status { margin-top: 20px; font-size: 18px; color: #333; }
+
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 80%;
+      max-width: 600px;
     }
 
-    #boostBtn.active {
-      background-color: #007bff; /* blue when active */
+    th, td {
+      padding: 8px 12px;
+      border: 1px solid #ccc;
     }
 
-    #status {
-      margin-top: 20px;
-      font-size: 18px;
-      color: #333;
+    th { background-color: #007bff; color: white; }
+    td.clicksCell { cursor: text; color: blue; text-decoration: underline; }
+
+    button.deleteBtn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
     }
+
+    button.deleteBtn:hover { background-color: #c82333; }
   </style>
 </head>
 <body>
-  <h1>Activate Boost</h1>
+  <h1>Activate Boost & Manage Countries</h1>
+
   <button id="boostBtn">Activate Boost</button>
+  <button id="resetMissileBtn">Reset Missile Cooldown</button>
   <div id="status"></div>
+
+  <h2>Country Clicks</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Country</th>
+        <th>Clicks</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="countryTable"></tbody>
+  </table>
 
   <script>
     const boostBtn = document.getElementById('boostBtn');
+    const resetMissileBtn = document.getElementById('resetMissileBtn');
     const statusEl = document.getElementById('status');
+    const countryTable = document.getElementById('countryTable');
+    const ADMIN_PASSWORD = "supersecret123123ret123123";
     let countdownInterval;
 
+    // --- Boost button ---
     boostBtn.addEventListener('click', async () => {
       try {
         const res = await fetch('/boost');
         const data = await res.json();
-
-        // Cambiar estilo y texto del botón
         boostBtn.classList.add('active');
         boostBtn.textContent = 'Boost Active!';
-
-        // Usar el tiempo enviado por el back
         let timeLeft = data.expiresIn;
         statusEl.textContent = `Boost activated! Time left: ${timeLeft}s`;
 
-        // Reiniciar contador si ya estaba corriendo
         if (countdownInterval) clearInterval(countdownInterval);
-
-        // Iniciar contador regresivo
         countdownInterval = setInterval(() => {
           timeLeft--;
           if (timeLeft > 0) {
@@ -77,11 +108,93 @@
             statusEl.textContent = 'Boost expired!';
           }
         }, 1000);
-
       } catch (err) {
         statusEl.textContent = 'Error activating boost';
       }
     });
+
+    // --- Reset missile cooldown button ---
+    resetMissileBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch(`/reset-missile?password=${ADMIN_PASSWORD}`, { method: 'POST' });
+        const text = await res.text();
+        alert(text);
+
+        // Enable missile button on main page if it exists
+        const missileBtn = parent.document.getElementById('missileButton');
+        if (missileBtn) missileBtn.disabled = false;
+
+        // Temporary feedback on the reset button
+        resetMissileBtn.textContent = 'Missile Reset!';
+        setTimeout(() => resetMissileBtn.textContent = 'Reset Missile Cooldown', 2000);
+      } catch (err) {
+        alert('Error resetting missile cooldown');
+      }
+    });
+
+    // --- Fetch and display country clicks ---
+    async function loadCountries() {
+      try {
+        const res = await fetch('/paises');
+        const countries = await res.json();
+        countryTable.innerHTML = '';
+
+        countries.forEach(c => {
+          const tr = document.createElement('tr');
+
+          tr.innerHTML = `
+            <td>${c.country_code}</td>
+            <td class="clicksCell" contenteditable="true">${c.clicks}</td>
+            <td><button class="deleteBtn">Delete</button></td>
+          `;
+
+          // Delete button
+          tr.querySelector('.deleteBtn').addEventListener('click', async () => {
+            if (!confirm(`Erase ${c.country_code} and its clicks?`)) return;
+            try {
+              const eraseRes = await fetch(`/erase-country?password=${ADMIN_PASSWORD}&country_code=${c.country_code}`, {
+                method: 'DELETE'
+              });
+              const text = await eraseRes.text();
+              alert(text);
+              loadCountries();
+            } catch (err) {
+              alert('Error erasing country');
+            }
+          });
+
+          // Inline clicks editing
+          const clicksCell = tr.querySelector('.clicksCell');
+          clicksCell.addEventListener('blur', async () => {
+            let newValue = parseInt(clicksCell.innerText);
+            if (isNaN(newValue)) {
+              alert('Invalid number');
+              loadCountries(); 
+              return;
+            }
+            const diff = newValue - c.clicks;
+            try {
+              const patchRes = await fetch(`/adjust-click?password=${ADMIN_PASSWORD}&country_code=${c.country_code}&amount=${diff}`, {
+                method: 'PATCH'
+              });
+              const text = await patchRes.text();
+              alert(text);
+              loadCountries();
+            } catch (err) {
+              alert('Error adjusting clicks');
+            }
+          });
+
+          countryTable.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+        countryTable.innerHTML = '<tr><td colspan="3">Error loading countries</td></tr>';
+      }
+    }
+
+    loadCountries();
   </script>
 </body>
 </html>
+  
