@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Activate Boost</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+      background-color: #f9f9f9;
+    }
+
+    #boostBtn {
+      font-size: 20px;
+      padding: 15px 30px;
+      cursor: pointer;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s, background-color 0.2s;
+    }
+
+    #boostBtn:hover {
+      background-color: #218838;
+      transform: scale(1.05);
+    }
+
+    #boostBtn.active {
+      background-color: #007bff; /* blue when active */
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Activate Boost</h1>
+  <button id="boostBtn">Activate Boost</button>
+  <div id="status"></div>
+
+  <script>
+    const boostBtn = document.getElementById('boostBtn');
+    const statusEl = document.getElementById('status');
+    let countdownInterval;
+
+    boostBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch('/boost');
+        const data = await res.json();
+
+        // Cambiar estilo y texto del botón
+        boostBtn.classList.add('active');
+        boostBtn.textContent = 'Boost Active!';
+
+        // Usar el tiempo enviado por el back
+        let timeLeft = data.expiresIn;
+        statusEl.textContent = `Boost activated! Time left: ${timeLeft}s`;
+
+        // Reiniciar contador si ya estaba corriendo
+        if (countdownInterval) clearInterval(countdownInterval);
+
+        // Iniciar contador regresivo
+        countdownInterval = setInterval(() => {
+          timeLeft--;
+          if (timeLeft > 0) {
+            statusEl.textContent = `Boost activated! Time left: ${timeLeft}s`;
+          } else {
+            clearInterval(countdownInterval);
+            boostBtn.classList.remove('active');
+            boostBtn.textContent = 'Activate Boost';
+            statusEl.textContent = 'Boost expired!';
+          }
+        }, 1000);
+
+      } catch (err) {
+        statusEl.textContent = 'Error activating boost';
+      }
+    });
+  </script>
+</body>
+</html>

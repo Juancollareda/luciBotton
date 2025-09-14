@@ -52,29 +52,61 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
+app.get('/boostbutton', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/powers.html'));
+});
+let boostActive = false;
+let boostTimer = null;
+let boostExpiresAt = null; // timestamp de expiración
+
+app.get('/boost', async (req, res) => {
+  boostActive = true;
+
+
+
+  // Resetear si ya había un temporizador
+  if (boostTimer) clearTimeout(boostTimer);
+
+  // 60 segundos de duración
+  const duration = 60 * 1000;
+  boostExpiresAt = Date.now() + duration;
+
+  boostTimer = setTimeout(() => {
+    boostActive = false;
+    boostExpiresAt = null;
+    console.log("Boost expired automatically after 1 minute");
+  }, duration);
+
+  res.json({
+    boost: "ON",
+    expiresIn: Math.floor(duration / 1000) // segundos
+  });
+});
 // Ruta de click: actualiza el contador global y por país
 app.get('/clicked', async (req, res) => {
-  // Obtener IP real y limpiar
   let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-  if (ip.includes(',')) ip = ip.split(',')[0]; // quedarse con la primera
-  if (ip.includes('::ffff:')) ip = ip.split('::ffff:')[1]; // IPv4 en formato IPv6
+  if (ip.includes(',')) ip = ip.split(',')[0];
+  if (ip.includes('::ffff:')) ip = ip.split('::ffff:')[1];
 
   const geo = geoip.lookup(ip);
-  const countryCode = geo?.country || 'XX'; // XX si no se puede determinar
+  const countryCode = geo?.country || 'XX';
 
   console.log(`Click desde IP: ${ip} (País: ${countryCode})`);
 
   try {
-    // Suma al contador global
-    await pool.query('UPDATE counter SET count = count + 1 WHERE id = 1');
+    // Si boost está activo, sumar 2 en lugar de 1
+    const increment = boostActive ? 2 : 1;
 
-    // Suma al contador por país
+    // Global
+    await pool.query('UPDATE counter SET count = count + $1 WHERE id = 1', [increment]);
+
+    // Por país
     await pool.query(`
       INSERT INTO country_clicks (country_code, clicks)
-      VALUES ($1, 1)
+      VALUES ($1, $2)
       ON CONFLICT (country_code)
-      DO UPDATE SET clicks = country_clicks.clicks + 1;
-    `, [countryCode]);
+      DO UPDATE SET clicks = country_clicks.clicks + $2;
+    `, [countryCode, increment]);
 
     const result = await pool.query('SELECT count FROM counter WHERE id = 1');
     const newCount = result.rows[0].count;
@@ -85,6 +117,7 @@ app.get('/clicked', async (req, res) => {
     res.status(500).send('Error al actualizar');
   }
 });
+
 
 
 app.get('/count', async (req, res) => {
@@ -109,6 +142,14 @@ app.get('/paises', async (req, res) => {
   } catch (err) {
     console.error('Error al obtener clicks por país:', err);
     res.status(500).send('Error al obtener clicks por país');
+  }
+});
+app.get('/boost-status', (req, res) => {
+  if (boostActive && boostExpiresAt) {
+    const expiresIn = Math.max(0, Math.floor((boostExpiresAt - Date.now()) / 1000));
+    res.json({ boost: "ON", expiresIn });
+  } else {
+    res.json({ boost: "OFF", expiresIn: 0 });
   }
 });
 

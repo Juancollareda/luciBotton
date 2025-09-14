@@ -120,10 +120,23 @@
       color: #ff4d4d;
       text-align: left;
     }
+
+    /* Estilo del timer */
+    #boostTimer {
+      font-size: 1.3rem;
+      color: #ffcc00;
+      margin-bottom: 15px;
+    }
+    #topFlag {
+      font-size: 6rem;
+      color: #ffcc00;
+      margin-bottom: 30px;
+    }
   </style>
 </head>
 <body>
   <div class="left">
+     <div id="topFlag" style="margin-bottom: 15px;"></div>
     <div id="response"></div>
     <h1>Global wololo Counter</h1>
 
@@ -149,6 +162,9 @@
   </div>
 
   <div class="right">
+    <!-- TIMER BOOST -->
+    <div id="boostTimer">Boost: OFF</div>
+
     <div id="ranking">
       <h2>Ranking by country</h2>
       <table>
@@ -158,14 +174,17 @@
             <th>Clicks</th>
           </tr>
         </thead>
-        <tbody id="rankingBody">
-       
-        </tbody>
+        <tbody id="rankingBody"></tbody>
       </table>
     </div>
   </div>
 
   <script>
+    let boostInterval = null;
+    let boostRemaining = 0;
+    let bgFlashInterval = null; // new for background flashing
+    let flashState = false;     // toggle between two colors
+
     function updateCount() {
       fetch('/count')
         .then(res => res.text())
@@ -176,20 +195,29 @@
     }
 
     function updateRanking() {
-      fetch('/paises')
-        .then(res => res.json())
-        .then(data => {
-          const tbody = document.getElementById('rankingBody');
-          tbody.innerHTML = '';
-          data.forEach(row => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${row.country_code}</td><td>${row.clicks}</td>`;
-            tbody.appendChild(tr);
-          });
-        })
-        .catch(console.error);
-    }
+  fetch('/paises')
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.getElementById('rankingBody');
+      tbody.innerHTML = '';
+      const topFlag = document.getElementById('topFlag');
 
+      data.forEach((row, index) => {
+        const tr = document.createElement('tr');
+
+        // If top country, add flag emoji or image
+        let countryDisplay = row.country_code;
+       if (index === 0) {
+  const flagUrl = `https://flagcdn.com/256x192/${row.country_code.toLowerCase()}.png`;
+  topFlag.innerHTML = `<img src="${flagUrl}" alt="${row.country_code}" style="height:96px;margin-right:20px;">Top country`;
+}
+
+        tr.innerHTML = `<td>${countryDisplay}</td><td>${row.clicks}</td>`;
+        tbody.appendChild(tr);
+      });
+    })
+    .catch(console.error);
+}
     function clickButton() {
       fetch('/clicked')
         .then(res => res.text())
@@ -203,12 +231,66 @@
         .catch(console.error);
     }
 
+    // 🔥 check boost status from backend
+    function checkBoostStatus() {
+      fetch('/boost-status')
+        .then(res => res.json())
+        .then(data => {
+          boostRemaining = data.expiresIn;
+          if (data.boost === "ON") {
+            startBoostTimer();
+          } else {
+            document.getElementById('boostTimer').textContent = "Boost: OFF";
+            clearInterval(boostInterval);
+          }
+        })
+        .catch(console.error);
+    }
+
+   function startBoostTimer() {
+  const timerEl = document.getElementById('boostTimer');
+  clearInterval(boostInterval);
+  if (bgFlashInterval) clearInterval(bgFlashInterval); // stop any previous flashing
+  flashState = false;
+
+  if (boostRemaining > 0) {
+    timerEl.textContent = "Boost Active: " + boostRemaining + "s";
+
+    // start background flashing
+    bgFlashInterval = setInterval(() => {
+      document.body.style.background = flashState
+        ? "linear-gradient(to right, #ff4d4d 50%, #000000 50%)"
+        : "linear-gradient(to right, #000000 50%, #ff4d4d 50%)";
+      flashState = !flashState;
+    }, 500); // every 0.5s
+
+    boostInterval = setInterval(() => {
+      boostRemaining--;
+      if (boostRemaining > 0) {
+        timerEl.textContent = "Boost Active: " + boostRemaining + "s";
+      } else {
+        timerEl.textContent = "Boost: OFF";
+        clearInterval(boostInterval);
+        clearInterval(bgFlashInterval); // stop flashing
+        document.body.style.background = "linear-gradient(to right, #ff4d4d 50%, #000000 50%)"; // reset to normal
+      }
+    }, 1000);
+  } else {
+    timerEl.textContent = "Boost: OFF";
+  }
+}
     window.onload = () => {
       updateCount();
       updateRanking();
       setInterval(updateCount, 1000);
       setInterval(updateRanking, 5000);
+
+      // 🚀 keep boost status synced across pages
+      checkBoostStatus();
+      setInterval(checkBoostStatus, 5000);
     };
   </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
