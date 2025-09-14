@@ -52,9 +52,20 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
+const ADMIN_PASSWORD = "supersecret123123ret123123"; // /boostbutton?password=supersecret123123ret123123
+
 app.get('/boostbutton', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/powers.html'));
+  const password = req.query.password;
+
+  if (password === ADMIN_PASSWORD) {
+    // Password correct → send the file
+    res.sendFile(path.join(__dirname, 'public/powers.html'));
+  } else {
+    // Wrong or missing password → deny access
+    res.status(403).send('Access denied. Wrong password.');
+  }
 });
+
 let boostActive = false;
 let boostTimer = null;
 let boostExpiresAt = null; // timestamp de expiración
