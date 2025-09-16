@@ -7,6 +7,32 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
+<!-- Fixed bottom nav -->
+<nav class="bottom-nav">
+  <button id="navMissileButton">
+    <img src="bunbat missil.png" alt="Missile Icon" style="height: 100px; vertical-align:middle;">
+  </button>
+  <button id="navBoostButton">
+    <img src="bunbat help.png" alt="Boost Icon" style="height: 100px; vertical-align:middle;">
+  </button>
+</nav>
+
+<!-- Modal for missile input -->
+<div id="missileModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" id="closeModal">&times;</span>
+    <h2>Enter Target Country</h2>
+    <input type="text" id="manualCountry" maxlength="3" placeholder="e.g. USA, AR, JP">
+    <button id="manualLaunch">Confirm</button>
+  </div>
+</div>
+<div id="cooldownModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" id="closeCooldown">&times;</span>
+    <h2>Missile Cooldown</h2>
+    <p id="cooldownMessage">This country is still on cooldown.</p>
+  </div>
+</div>
 <body>
   <div class="left">
     <div id="response"></div>
@@ -45,13 +71,7 @@
 
     <audio id="clickSound" src="wolol.mp3" preload="auto"></audio>
 
-    <button id="missileButton" class="gif-button" onclick="launchMissile()" disabled>
-        <img 
-    src="bunbat missil.png" 
-    alt="Missile" 
-    style="width:120px; height:auto; border-radius:10px;" 
-  />
-    </button>
+
 
     <div id="missileStatus" style="margin-top:10px; font-size:1.2rem; color:#ffdd00;"></div>
 

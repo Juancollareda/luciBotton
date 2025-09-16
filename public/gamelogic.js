@@ -1,18 +1,19 @@
-
 let boostInterval = null;
 let boostRemaining = 0;
 let bgFlashInterval = null;
 let flashState = false;
 
-// Count update
+// ====================== COUNT ======================
 function updateCount() {
   fetch('/count')
     .then(res => res.text())
-    .then(data => { document.getElementById('response').innerText = data; })
+    .then(data => {
+      document.getElementById('response').innerText = data;
+    })
     .catch(console.error);
 }
 
-// Ranking update
+// ====================== RANKING ======================
 function updateRanking() {
   fetch('/paises')
     .then(res => res.json())
@@ -23,7 +24,7 @@ function updateRanking() {
 
       data.forEach((row, index) => {
         const tr = document.createElement('tr');
-        let countryDisplay = row.country_code;
+        const countryDisplay = row.country_code;
 
         if (index === 0) {
           const flagUrl = `https://flagcdn.com/256x192/${row.country_code.toLowerCase()}.png`;
@@ -33,11 +34,22 @@ function updateRanking() {
         tr.innerHTML = `<td>${countryDisplay}</td><td>${row.clicks}</td>`;
         tbody.appendChild(tr);
       });
+
+      // Refresh datalist for missile input
+      const datalist = document.getElementById("countriesList");
+      if (datalist) {
+        datalist.innerHTML = '';
+        data.forEach(c => {
+          const opt = document.createElement("option");
+          opt.value = c.country_code;
+          datalist.appendChild(opt);
+        });
+      }
     })
     .catch(console.error);
 }
 
-// Regular button click
+// ====================== BUTTON CLICK ======================
 function clickButton() {
   fetch('/clicked')
     .then(res => res.text())
@@ -51,7 +63,7 @@ function clickButton() {
     .catch(console.error);
 }
 
-// Boost timer
+// ====================== BOOST ======================
 function checkBoostStatus() {
   fetch('/boost-status')
     .then(res => res.json())
@@ -84,8 +96,9 @@ function startBoostTimer() {
 
     boostInterval = setInterval(() => {
       boostRemaining--;
-      if (boostRemaining > 0) timerEl.textContent = "Boost Active: " + boostRemaining + "s";
-      else {
+      if (boostRemaining > 0) {
+        timerEl.textContent = "Boost Active: " + boostRemaining + "s";
+      } else {
         timerEl.textContent = "Boost: OFF";
         clearInterval(boostInterval);
         clearInterval(bgFlashInterval);
@@ -95,7 +108,7 @@ function startBoostTimer() {
   } else timerEl.textContent = "Boost: OFF";
 }
 
-// Missile logic
+// ====================== MISSILE ======================
 function checkMissileStatus() {
   fetch('/missile-status')
     .then(res => res.json())
@@ -112,7 +125,8 @@ function checkMissileStatus() {
     })
     .catch(console.error);
 }
-// Frenzy click logic
+
+// Frenzy logic
 let frenzyActive = false;
 let frenzyCount = 0;
 
@@ -137,19 +151,16 @@ function startMissileFrenzy(target) {
       button.style.display = 'none';
       resultEl.textContent = `You clicked ${frenzyCount} times! Missile power applied!`;
 
-     fetch(`/missile?amount=${frenzyCount}&target=${target}`, { method: 'POST' })
-    .then(res => res.text())
-    .then(msg => {
-      document.getElementById('missileStatus').textContent = msg;
-      updateCount();
-      updateRanking();
-
-      // now refresh cooldown for this target
-      checkMissileStatusForTarget(target);
-    })
-    .catch(console.error);
-}
-    
+      fetch(`/missile?amount=${frenzyCount}&target=${target}`, { method: 'POST' })
+        .then(res => res.text())
+        .then(msg => {
+          document.getElementById('missileStatus').textContent = msg;
+          updateCount();
+          updateRanking();
+          checkMissileStatusForTarget(target);
+        })
+        .catch(console.error);
+    }
   }, 1000);
 
   button.onclick = () => {
@@ -157,56 +168,6 @@ function startMissileFrenzy(target) {
   };
 }
 
-function launchMissile() {
-  fetch('/paises')
-    .then(res => res.json())
-    .then(data => {
-      const container = document.getElementById('missileTargetContainer');
-      const select = document.getElementById('missileTarget');
-      select.innerHTML = '';
-      data.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c.country_code;
-        opt.text = c.country_code;
-        select.appendChild(opt);
-      });
-
-      container.style.display = 'block';
-      const confirmBtn = document.getElementById('confirmMissile');
-      confirmBtn.style.display = 'inline-block';
-
-      let countdown = 10;
-      const timerEl = document.getElementById('missileTimer');
-      timerEl.textContent = ` ${countdown}s`;
-
-      const interval = setInterval(() => {
-        countdown--;
-        timerEl.textContent = ` ${countdown}s`;
-        if (countdown <= 0) {
-          clearInterval(interval);
-          confirmBtn.style.display = 'none';
-          timerEl.textContent = '';
-        }
-      }, 1000);
-
-      confirmBtn.onclick = () => {
-        const target = select.value;
-        if (!target) return;
-
-        // Start the frenzy clicks
-        startMissileFrenzy(target, () => {
-          // Callback after frenzy ends
-          checkMissileStatusForTarget(target);
-        });
-
-        clearInterval(interval);
-        confirmBtn.style.display = 'none';
-        timerEl.textContent = '';
-      };
-    });
-}
-
-// Update missile status for a specific target
 function checkMissileStatusForTarget(target) {
   fetch(`/missile-status?target=${target}`)
     .then(res => res.json())
@@ -218,13 +179,60 @@ function checkMissileStatusForTarget(target) {
         statusEl.textContent = "Missile ready!";
       } else {
         missileBtn.disabled = true;
-        statusEl.textContent = `Missile already used today. Next available in ${data.hours}h ${data.minutes}m`;
+        statusEl.textContent = `Missile already used for ${target}. Next available in ${data.hours}h ${data.minutes}m`;
       }
     })
     .catch(console.error);
 }
 
-// Window onload
+// ====================== MODALS ======================
+const missileModal = document.getElementById("missileModal");
+const cooldownModal = document.getElementById("cooldownModal");
+const cooldownMsg = document.getElementById("cooldownMessage");
+
+const navMissileButton = document.getElementById("navMissileButton");
+const closeModal = document.getElementById("closeModal");
+const closeCooldown = document.getElementById("closeCooldown");
+const manualLaunchBtn = document.getElementById("manualLaunch");
+
+navMissileButton.onclick = () => {
+  missileModal.style.display = "flex";
+};
+
+closeModal.onclick = () => {
+  missileModal.style.display = "none";
+};
+closeCooldown.onclick = () => {
+  cooldownModal.style.display = "none";
+};
+
+window.onclick = (e) => {
+  if (e.target === missileModal) missileModal.style.display = "none";
+  if (e.target === cooldownModal) cooldownModal.style.display = "none";
+};
+
+// Manual missile launch
+manualLaunchBtn.onclick = () => {
+  const target = document.getElementById("manualCountry").value.trim().toUpperCase();
+  if (!target) return;
+
+  // Check cooldown before launching
+  fetch(`/missile-status?target=${target}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.canLaunch) {
+        cooldownMsg.textContent = `Missile already used for ${target}. Next available in ${data.hours}h ${data.minutes}m`;
+        cooldownModal.style.display = "flex";
+      } else {
+        startMissileFrenzy(target);
+      }
+    })
+    .catch(console.error);
+
+  missileModal.style.display = "none";
+};
+
+// ====================== INIT ======================
 window.onload = () => {
   updateCount();
   updateRanking();

@@ -5,6 +5,7 @@ const getIP = require('../utils/getIP');
 
 const router = express.Router();
 
+const ADMIN_PASSWORD = "supersecret123123ret123123";
 router.post('/missile', async (req, res) => {
   const ip = getIP(req);
   const geo = geoip.lookup(ip);
@@ -82,6 +83,32 @@ router.get('/missile-status', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ canLaunch: false });
+  }
+});
+router.post('/reset-missile-cooldown', async (req, res) => {
+  const { password, country_code } = req.query;
+
+  // Check admin password
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(403).send('Access denied. Wrong password.');
+  }
+
+  if (!country_code) {
+    return res.status(400).send('Missing country_code');
+  }
+
+  try {
+    // Reset the missile cooldown for the specified country
+    const result = await pool.query(`
+      INSERT INTO country_missiles (country_code, last_missile)
+      VALUES ($1, NULL)
+      ON CONFLICT (country_code) DO UPDATE SET last_missile = NULL
+    `, [country_code.toUpperCase()]);
+
+    res.send(`Missile cooldown for ${country_code.toUpperCase()} has been reset.`);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error resetting missile cooldown.');
   }
 });
 

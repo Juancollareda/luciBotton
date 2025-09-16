@@ -1,11 +1,3 @@
-const express = require('express');
-const path = require('path');
-const { Pool } = require('pg');
-const geoip = require('geoip-lite');
-require('dotenv').config();
-
-const app = express();
-const PORT = process.env.PORT || 3000;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -333,8 +325,4 @@ app.get('/missile-cooldowns', async (req, res) => {
     console.error(err);
     res.status(500).send('Error fetching missile cooldown data');
   }
-});
-app.listen(PORT, async () => {
-  await initializeCounterTable();
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
