@@ -189,12 +189,14 @@ function checkMissileStatusForTarget(target) {
 const missileModal = document.getElementById("missileModal");
 const cooldownModal = document.getElementById("cooldownModal");
 const cooldownMsg = document.getElementById("cooldownMessage");
+const helpModal = document.getElementById("HelpModal");
+const navHelpButton = document.getElementById("navHelpButton");
 
 const navMissileButton = document.getElementById("navMissileButton");
 const closeModal = document.getElementById("closeModal");
 const closeCooldown = document.getElementById("closeCooldown");
 const manualLaunchBtn = document.getElementById("manualLaunch");
-
+const closeHelp = document.getElementById("closeHelp");
 navMissileButton.onclick = () => {
   missileModal.style.display = "flex";
 };
@@ -205,10 +207,19 @@ closeModal.onclick = () => {
 closeCooldown.onclick = () => {
   cooldownModal.style.display = "none";
 };
+// Open modal
+navHelpButton.onclick = () => {
+  helpModal.style.display = "flex";
+};
 
+// Close modal
+closeHelp.onclick = () => {
+  helpModal.style.display = "none";
+};
 window.onclick = (e) => {
   if (e.target === missileModal) missileModal.style.display = "none";
   if (e.target === cooldownModal) cooldownModal.style.display = "none";
+   if (e.target === helpModal) helpModal.style.display = "none";
 };
 
 // Manual missile launch
