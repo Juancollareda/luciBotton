@@ -15,11 +15,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 const { router: clickRoutes } = require('./routes/clickRoutes');
 const boostRoutes = require('./routes/boostRoutes');
 const missileRoutes = require('./routes/missileRoutes');
+const SpawnRoute = require('./routes/spawnRoutes'); // Import the spawn route
 
 app.use(clickRoutes);
 app.use(boostRoutes);
 app.use(missileRoutes);
-
+app.use(SpawnRoute); // Use the spawn route
 async function initializeTables() {
   try {
     await pool.query(`

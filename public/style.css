@@ -297,3 +297,9 @@
   cursor: pointer;
   color: #ff4d4d;
 }
+ #apple {
+      position: absolute;
+      width: 80px; /* size of apple */
+      cursor: pointer;
+      display: none; /* hidden until spawned */
+    }

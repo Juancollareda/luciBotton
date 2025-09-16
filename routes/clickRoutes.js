@@ -30,6 +30,31 @@ router.get('/clicked', async (req, res) => {
   }
 });
 
+router.get('/clickedgolden', async (req, res) => {
+  const ip = getIP(req);
+  const geo = geoip.lookup(ip);
+  const countryCode = geo?.country || 'XX';
+console.log("Golden apple clicked from IP:", ip, "Country:", countryCode);
+  try {
+    const increment = 1000;
+    await pool.query('UPDATE counter SET count = count + $1 WHERE id = 1', [increment]);
+    await pool.query(`
+      INSERT INTO country_clicks (country_code, clicks)
+      VALUES ($1, $2)
+      ON CONFLICT (country_code)
+      DO UPDATE SET clicks = country_clicks.clicks + $2;
+    `, [countryCode, increment]);
+
+    const result = await pool.query('SELECT count FROM counter WHERE id = 1');
+    res.send(`thanks for clicking. Total: ${result.rows[0].count}`);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error updating clicks.');
+  }
+});
+
+
+
 router.get('/count', async (req, res) => {
   try {
     const result = await pool.query('SELECT count FROM counter WHERE id = 1');
