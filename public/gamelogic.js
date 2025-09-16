@@ -179,7 +179,7 @@ function checkMissileStatusForTarget(target) {
         statusEl.textContent = "Missile ready!";
       } else {
         missileBtn.disabled = true;
-        statusEl.textContent = `Missile already used for ${target}. Next available in ${data.hours}h ${data.minutes}m`;
+        statusEl.textContent = `Missile already used . Next available in ${data.hours}h ${data.minutes}m`;
       }
     })
     .catch(console.error);
