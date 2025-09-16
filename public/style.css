@@ -207,7 +207,7 @@
 /* Bottom navigation bar */
 .bottom-nav {
   position: fixed;
-  top: 130;
+  top: 40%;
   left: 0;            /* full screen height */
   width: 140px;               /* narrow sidebar */
   background:transparent;
