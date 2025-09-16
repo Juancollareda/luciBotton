@@ -4,7 +4,7 @@ const pool = require('../db');
 const getIP = require('../utils/getIP');
 
 const router = express.Router();
-
+const MISSILE_COOLDOWN_MS =  (1 * 60 * 60 * 1000)/2; // 30 minutes for testing
 const ADMIN_PASSWORD = "supersecret123123ret123123";
 router.post('/missile', async (req, res) => {
   const ip = getIP(req);
@@ -25,7 +25,7 @@ router.post('/missile', async (req, res) => {
     const now = new Date();
     if (missileRes.rows.length > 0 && missileRes.rows[0].last_missile) {
       const last = new Date(missileRes.rows[0].last_missile);
-      if ((now - last) < 24*60*60*1000) {
+      if ((now - last) < MISSILE_COOLDOWN_MS) {
         return res.status(403).send(`Your country ${userCountry} can only launch once per day.`);
       }
     }
@@ -70,11 +70,11 @@ router.get('/missile-status', async (req, res) => {
     if (!missileRes.rows.length || !missileRes.rows[0].last_missile) return res.json({ canLaunch: true });
 
     const diff = Date.now() - new Date(missileRes.rows[0].last_missile).getTime();
-    const cooldown = 24 * 60 * 60 * 1000;
+    
 
-    if (diff >= cooldown) return res.json({ canLaunch: true });
+    if (diff >= MISSILE_COOLDOWN_MS) return res.json({ canLaunch: true });
 
-    const remainingMs = cooldown - diff;
+    const remainingMs = MISSILE_COOLDOWN_MS - diff;
     const hours = Math.floor(remainingMs / (1000*60*60));
     const minutes = Math.floor((remainingMs % (1000*60*60)) / (1000*60));
     const seconds = Math.floor((remainingMs % (1000*60)) / 1000);

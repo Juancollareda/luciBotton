@@ -2,6 +2,8 @@ let boostInterval = null;
 let boostRemaining = 0;
 let bgFlashInterval = null;
 let flashState = false;
+let frenzyActive = false;
+let frenzyCount = 0;
 
 // ====================== COUNT ======================
 function updateCount() {
@@ -110,7 +112,7 @@ function startBoostTimer() {
 
 // ====================== MISSILE ======================
 function checkMissileStatus() {
-  fetch('/missile-status')
+  fetch('/missile-status') // <--- Sin target, revisa el país que lanza
     .then(res => res.json())
     .then(data => {
       const missileBtn = document.getElementById('missileButton');
@@ -120,16 +122,13 @@ function checkMissileStatus() {
         statusEl.textContent = "Missile ready!";
       } else {
         missileBtn.disabled = true;
-        statusEl.textContent = `Missile already used today. Next available in ${data.hours}h ${data.minutes}m`;
+        statusEl.textContent = `Missile already used. Next available in ${data.hours}h ${data.minutes}m ${data.seconds}s`;
       }
     })
     .catch(console.error);
 }
 
 // Frenzy logic
-let frenzyActive = false;
-let frenzyCount = 0;
-
 function startMissileFrenzy(target) {
   const button = document.getElementById('frenzyMissileButton');
   const resultEl = document.getElementById('frenzyMissileResult');
@@ -139,7 +138,7 @@ function startMissileFrenzy(target) {
   button.style.display = 'inline-block';
   resultEl.textContent = 'Click as fast as you can!';
 
-  let countdown = 10;
+  let countdown = 30;
   button.textContent = `${countdown}s`;
 
   const interval = setInterval(() => {
@@ -157,7 +156,7 @@ function startMissileFrenzy(target) {
           document.getElementById('missileStatus').textContent = msg;
           updateCount();
           updateRanking();
-          checkMissileStatusForTarget(target);
+          checkMissileStatus(); // revisa cooldown del país que lanzó
         })
         .catch(console.error);
     }
@@ -168,58 +167,28 @@ function startMissileFrenzy(target) {
   };
 }
 
-function checkMissileStatusForTarget(target) {
-  fetch(`/missile-status?target=${target}`)
-    .then(res => res.json())
-    .then(data => {
-      const missileBtn = document.getElementById('missileButton');
-      const statusEl = document.getElementById('missileStatus');
-      if (data.canLaunch) {
-        missileBtn.disabled = false;
-        statusEl.textContent = "Missile ready!";
-      } else {
-        missileBtn.disabled = true;
-        statusEl.textContent = `Missile already used . Next available in ${data.hours}h ${data.minutes}m`;
-      }
-    })
-    .catch(console.error);
-}
-
 // ====================== MODALS ======================
 const missileModal = document.getElementById("missileModal");
 const cooldownModal = document.getElementById("cooldownModal");
 const cooldownMsg = document.getElementById("cooldownMessage");
 const helpModal = document.getElementById("HelpModal");
 const navHelpButton = document.getElementById("navHelpButton");
-
 const navMissileButton = document.getElementById("navMissileButton");
 const closeModal = document.getElementById("closeModal");
 const closeCooldown = document.getElementById("closeCooldown");
 const manualLaunchBtn = document.getElementById("manualLaunch");
 const closeHelp = document.getElementById("closeHelp");
-navMissileButton.onclick = () => {
-  missileModal.style.display = "flex";
-};
 
-closeModal.onclick = () => {
-  missileModal.style.display = "none";
-};
-closeCooldown.onclick = () => {
-  cooldownModal.style.display = "none";
-};
-// Open modal
-navHelpButton.onclick = () => {
-  helpModal.style.display = "flex";
-};
+navMissileButton.onclick = () => missileModal.style.display = "flex";
+closeModal.onclick = () => missileModal.style.display = "none";
+closeCooldown.onclick = () => cooldownModal.style.display = "none";
+navHelpButton.onclick = () => helpModal.style.display = "flex";
+closeHelp.onclick = () => helpModal.style.display = "none";
 
-// Close modal
-closeHelp.onclick = () => {
-  helpModal.style.display = "none";
-};
 window.onclick = (e) => {
   if (e.target === missileModal) missileModal.style.display = "none";
   if (e.target === cooldownModal) cooldownModal.style.display = "none";
-   if (e.target === helpModal) helpModal.style.display = "none";
+  if (e.target === helpModal) helpModal.style.display = "none";
 };
 
 // Manual missile launch
@@ -227,12 +196,12 @@ manualLaunchBtn.onclick = () => {
   const target = document.getElementById("manualCountry").value.trim().toUpperCase();
   if (!target) return;
 
-  // Check cooldown before launching
-  fetch(`/missile-status?target=${target}`)
+  // Solo revisamos el cooldown del país que lanza
+  fetch(`/missile-status`)
     .then(res => res.json())
     .then(data => {
       if (!data.canLaunch) {
-        cooldownMsg.textContent = `Missile already used for ${target}. Next available in ${data.hours}h ${data.minutes}m`;
+        cooldownMsg.textContent = `Missile already used. Next available in ${data.hours}h ${data.minutes}m ${data.seconds}s.`;
         cooldownModal.style.display = "flex";
       } else {
         startMissileFrenzy(target);
