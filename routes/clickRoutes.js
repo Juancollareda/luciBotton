@@ -34,10 +34,12 @@ router.get('/clickedgolden', async (req, res) => {
   const ip = getIP(req);
   const geo = geoip.lookup(ip);
   const countryCode = geo?.country || 'XX';
-console.log("Golden apple clicked from IP:", ip, "Country:", countryCode);
+  console.log("Golden apple clicked from IP:", ip, "Country:", countryCode);
+
   try {
-    const increment = 1000;
-    await pool.query('UPDATE counter SET count = count + $1 WHERE id = 1', [increment]);
+    const increment = 1000; // golden touch value
+
+    // Always update both the country and the global counter together
     await pool.query(`
       INSERT INTO country_clicks (country_code, clicks)
       VALUES ($1, $2)
@@ -45,8 +47,11 @@ console.log("Golden apple clicked from IP:", ip, "Country:", countryCode);
       DO UPDATE SET clicks = country_clicks.clicks + $2;
     `, [countryCode, increment]);
 
-    const result = await pool.query('SELECT count FROM counter WHERE id = 1');
-    res.send(`thanks for clicking. Total: ${result.rows[0].count}`);
+    // Update global counter **as sum of all country clicks** to avoid desync
+    const sumResult = await pool.query('SELECT SUM(clicks) AS total FROM country_clicks');
+    await pool.query('UPDATE counter SET count = $1 WHERE id = 1', [sumResult.rows[0].total]);
+
+    res.send(`Golden apple clicked! Total: ${sumResult.rows[0].total}`);
   } catch (err) {
     console.error(err);
     res.status(500).send('Error updating clicks.');
