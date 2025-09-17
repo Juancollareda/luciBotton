@@ -2,6 +2,7 @@ const Golden = {
   score: 0,
   apple: null,
   scoreDisplay: null,
+  _cooldown: false, // cooldown interno
 
   // función para esperar a que un elemento exista en el DOM
   waitForElement(selector, callback) {
@@ -36,7 +37,6 @@ const Golden = {
           const res = await fetch("/clickedgolden");
           const text = await res.text();
           console.log("Server response:", text);
-    
 
           // si querés mostrar el score:
           // if (this.scoreDisplay) this.scoreDisplay.textContent = text;
@@ -48,7 +48,7 @@ const Golden = {
   },
 
   spawnApple() {
-    if (!this.apple) return; // si no existe, no hacemos nada
+    if (!this.apple || this._cooldown) return; // no spawn si en cooldown
 
     const screenW = window.innerWidth;
     const screenH = window.innerHeight;
@@ -59,6 +59,13 @@ const Golden = {
     this.apple.style.left = `${x}px`;
     this.apple.style.top = `${y}px`;
     this.apple.style.display = "block";
+
+    // Activar cooldown
+    this._cooldown = true;
+    setTimeout(() => {
+      this._cooldown = false;
+      this.apple.style.display = "none"; // oculta la manzana después del cooldown
+    }, 10000); // 3 segundos de cooldown, ajustable
   },
 
   async checkEndpoint() {

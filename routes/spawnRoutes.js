@@ -4,15 +4,20 @@ const pool = require('../db');
 const getIP = require('../utils/getIP');
 
 const router = express.Router();
-
+let spawnStreak = 0;
 // GET /spawn-apple
 router.get("/spawn-apple", (req, res) => {
-  // Here you decide if an apple should spawn
-  // You could use random chance, DB condition, or game logic
+  // Small chance normally
+  let chance = 0.05;
 
-  const shouldSpawn = Math.random() < 0.1; // 10% chance to spawn
+  // Increase chance if no apple spawned in a while
+  if (spawnStreak > 5) chance = 0.5;
 
-  res.json({ spawn: shouldSpawn });
+  const shouldSpawn = Math.random() < chance;
+
+  spawnStreak = shouldSpawn ? 0 : spawnStreak + 1;
+
+  res.json({ spawn: shouldSpawn, streak: spawnStreak });
 });
 
 module.exports = router;

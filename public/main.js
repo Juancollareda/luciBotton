@@ -19,7 +19,7 @@ window.onload = () => {
   setInterval(Ranking.update, 5000);
   setInterval(() => Boost.checkStatus(), 5000);
   setInterval(() => Missile.checkStatus(), 10000);
-  setInterval(() => Golden.checkEndpoint(), 2000); // poll backend
+  setInterval(() => Golden.checkEndpoint(), 10000); // poll backend
 
   document.querySelector('.gif-button').onclick = Count.click;
 };
