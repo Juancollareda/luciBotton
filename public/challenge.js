@@ -1,3 +1,26 @@
+// Initialize WebSocket for real-time challenge updates
+const socket = new WebSocket(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`);
+let currentCountry = null;
+
+// Get current country code
+fetch('/api/current-country')
+    .then(response => response.json())
+    .then(data => {
+        currentCountry = data.country;
+    })
+    .catch(error => console.error('Error getting current country:', error));
+
+// Listen for challenge updates
+socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (data.type === 'challengeStart' && data.challengeId) {
+        // Only start competition if current user is involved
+        if (data.challengerCountry === currentCountry || data.challengedCountry === currentCountry) {
+            startClickingCompetition(data.challengeId);
+        }
+    }
+};
+
 // Challenge Modal functionality
 const challengeModal = document.getElementById('challengeModal');
 const navClickerButton = document.getElementById('navClickerButton');
@@ -159,8 +182,21 @@ function startClickingCompetition(challengeId) {
     challengeButton.className = 'challenge-frenzy-button';
     challengeButton.innerHTML = 'CLICK FAST!<br>30s left';
     
-    // Add button to the page
-    document.querySelector('.challenge-content').appendChild(challengeButton);
+    // Add button to the page - outside the challenge modal
+    document.querySelector('.left').appendChild(challengeButton);
+    challengeButton.style.position = 'fixed';
+    challengeButton.style.bottom = '150px';
+    challengeButton.style.left = '50%';
+    challengeButton.style.transform = 'translateX(-50%)';
+    challengeButton.style.zIndex = '1000';
+    challengeButton.style.padding = '20px 40px';
+    challengeButton.style.fontSize = '24px';
+    challengeButton.style.backgroundColor = '#ff4d4d';
+    challengeButton.style.color = 'white';
+    challengeButton.style.border = 'none';
+    challengeButton.style.borderRadius = '10px';
+    challengeButton.style.cursor = 'pointer';
+    challengeButton.style.boxShadow = '0 0 20px rgba(255, 77, 77, 0.5)';
     
     let clicks = 0;
     let timeLeft = 30;

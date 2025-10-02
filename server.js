@@ -29,6 +29,7 @@ const boostRoutes = require('./routes/boostRoutes');
 const missileRoutes = require('./routes/missileRoutes');
 const SpawnRoute = require('./routes/spawnRoutes');
 const challengeRoutes = require('./routes/challengeRoutes');
+const countryRoutes = require('./routes/countryRoutes');
 
 app.use(express.json()); // Add middleware to parse JSON bodies
 app.use(clickRoutes);
@@ -36,6 +37,7 @@ app.use(boostRoutes);
 app.use(missileRoutes);
 app.use(SpawnRoute);
 app.use(challengeRoutes);
+app.use(countryRoutes);
 async function initializeTables() {
   try {
     await pool.query(`
