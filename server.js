@@ -5,7 +5,7 @@ const http = require('http');
 const https = require('https');
 require('dotenv').config();
 
-const pool = require('./db');  // ✅ use the shared pool
+const { pool, getPool } = require('./db');
 const setupWebSocket = require('./websocket');
 
 const requireHTTPS = require('./middleware/requireHTTPS');
@@ -103,8 +103,32 @@ global.broadcast = broadcast;
 // Setup WebSocket handlers
 setupWSHandlers(wss);
 
-server.listen(PORT, async () => {
-  await initializeTables();
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-  console.log(`Server running at ${protocol}://localhost:${PORT}`);
-});
+// Start server with proper error handling
+async function startServer() {
+  try {
+    // Ensure database connection works
+    await getPool();
+    
+    // Initialize tables
+    await initializeTables();
+    
+    // Start listening
+    server.listen(PORT, () => {
+      const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+      console.log(`Server running at ${protocol}://localhost:${PORT}`);
+    });
+
+    // Handle server errors
+    server.on('error', (err) => {
+      console.error('Server error:', err);
+      process.exit(1);
+    });
+
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+}
+
+// Start the server
+startServer();

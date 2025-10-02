@@ -24,11 +24,4 @@ window.onload = () => {
   setInterval(() => Boost.checkStatus(), 5000);
   setInterval(() => Missile.checkStatus(), 10000);
   setInterval(() => Golden.checkEndpoint(), 10000);
-
-  setInterval(Count.update, 1000);
-  setInterval(() => Boost.checkStatus(), 5000);
-  setInterval(() => Missile.checkStatus(), 10000);
-  setInterval(() => Golden.checkEndpoint(), 10000);
-
-  document.getElementById('mainClickButton').onclick = Count.click;
 };

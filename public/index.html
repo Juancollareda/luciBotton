@@ -80,6 +80,26 @@
         box-shadow: 0 0 30px rgba(255, 77, 77, 0.8);
       }
     }
+    
+    @keyframes pulse {
+      0% { transform: translate(-50%, 50%) scale(1); }
+      50% { transform: translate(-50%, 50%) scale(1.1); }
+      100% { transform: translate(-50%, 50%) scale(1); }
+    }
+
+    .challenge-notification {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      z-index: 9999;
+      animation: bounceIn 0.5s;
+    }
   </style>
 </head>
 <!-- Fixed bottom nav -->

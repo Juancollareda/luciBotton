@@ -14,10 +14,25 @@ fetch('/api/current-country')
 socket.onmessage = (event) => {
     const data = JSON.parse(event.data);
     if (data.type === 'challengeStart' && data.challengeId) {
-        // Only start competition if current user is involved
-        if (data.challengerCountry === currentCountry || data.challengedCountry === currentCountry) {
-            startClickingCompetition(data.challengeId);
-        }
+        // Show a notification first
+        const notification = document.createElement('div');
+        notification.className = 'challenge-notification animate__animated animate__bounceIn';
+        notification.innerHTML = `
+            <h2>Challenge Starting!</h2>
+            <p>${data.challengerCountry} vs ${data.challengedCountry}</p>
+            <p>Get ready to click!</p>
+        `;
+        document.body.appendChild(notification);
+
+        // Remove notification and start competition after 2 seconds
+        setTimeout(() => {
+            notification.remove();
+            startClickingCompetition(
+                data.challengeId,
+                data.challengerCountry,
+                data.challengedCountry
+            );
+        }, 2000);
     }
 };
 
@@ -139,7 +154,13 @@ function createChallengeCard(challenge) {
 
 // Create challenge action buttons based on challenge status
 function createChallengeActions(challenge) {
-    if (challenge.status === 'pending') {
+    // Get current user's country
+    if (!currentCountry) return ''; // If we don't know the country yet, don't show actions
+
+    // Only show accept/reject buttons if:
+    // 1. Challenge is pending
+    // 2. Current user is the challenged country
+    if (challenge.status === 'pending' && challenge.challenged_country === currentCountry) {
         return `
             <div class="challenge-card-actions">
                 <button class="challenge-card-button accept" onclick="acceptChallenge(${challenge.id})">
@@ -176,27 +197,37 @@ window.acceptChallenge = async function(challengeId) {
 }
 
 // Handle clicking competition
-function startClickingCompetition(challengeId) {
+function startClickingCompetition(challengeId, challengerCountry, challengedCountry) {
+    // Only show button if this user is part of the challenge
+    if (currentCountry !== challengerCountry && currentCountry !== challengedCountry) {
+        return;
+    }
+
+    // Close the challenge modal if it's open
+    challengeModal.style.display = 'none';
+
+    // Create the challenge button
     const challengeButton = document.createElement('button');
     challengeButton.id = 'challengeFrenzyButton';
-    challengeButton.className = 'challenge-frenzy-button';
+    challengeButton.className = 'challenge-frenzy-button animate__animated animate__bounceIn';
     challengeButton.innerHTML = 'CLICK FAST!<br>30s left';
     
-    // Add button to the page - outside the challenge modal
-    document.querySelector('.left').appendChild(challengeButton);
+    // Add button to the page - make it very visible
+    document.body.appendChild(challengeButton);
     challengeButton.style.position = 'fixed';
-    challengeButton.style.bottom = '150px';
+    challengeButton.style.bottom = '50%';
     challengeButton.style.left = '50%';
-    challengeButton.style.transform = 'translateX(-50%)';
-    challengeButton.style.zIndex = '1000';
-    challengeButton.style.padding = '20px 40px';
-    challengeButton.style.fontSize = '24px';
+    challengeButton.style.transform = 'translate(-50%, 50%)';
+    challengeButton.style.zIndex = '9999';
+    challengeButton.style.padding = '40px 80px';
+    challengeButton.style.fontSize = '32px';
     challengeButton.style.backgroundColor = '#ff4d4d';
     challengeButton.style.color = 'white';
-    challengeButton.style.border = 'none';
-    challengeButton.style.borderRadius = '10px';
+    challengeButton.style.border = '4px solid #fff';
+    challengeButton.style.borderRadius = '15px';
     challengeButton.style.cursor = 'pointer';
-    challengeButton.style.boxShadow = '0 0 20px rgba(255, 77, 77, 0.5)';
+    challengeButton.style.boxShadow = '0 0 40px rgba(255, 77, 77, 0.8)';
+    challengeButton.style.animation = 'pulse 1s infinite';
     
     let clicks = 0;
     let timeLeft = 30;
