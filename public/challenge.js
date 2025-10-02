@@ -141,7 +141,7 @@ async function acceptChallenge(challengeId) {
         
         if (response.ok) {
             alert('Challenge accepted! Get ready to click!');
-            startClickingCompetition(challengeId);
+            // The WebSocket will trigger the competition for both parties
             refreshChallenges();
         } else {
             alert(data.error || 'Failed to accept challenge');
@@ -227,6 +227,16 @@ function startClickingCompetition(challengeId) {
             });
     }
 }
+
+// Listen for WebSocket challenge notifications
+const socket = new WebSocket(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`);
+
+socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (data.type === 'challengeStart' && data.challengeId) {
+        startClickingCompetition(data.challengeId);
+    }
+};
 
 // Initialize refresh interval
 setInterval(refreshChallenges, 30000); // Refresh every 30 seconds

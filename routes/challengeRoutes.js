@@ -93,6 +93,13 @@ router.post('/api/challenge/:id/accept', async (req, res) => {
             ['active', challengeId]
         );
 
+        // Notify both countries through WebSocket
+        global.broadcast('challengeStart', { 
+            challengeId,
+            challengerCountry: challenge.challenger_country,
+            challengedCountry: challenge.challenged_country
+        });
+
         res.json({ message: 'Challenge accepted successfully' });
     } catch (error) {
         console.error('Error accepting challenge:', error);
