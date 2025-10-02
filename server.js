@@ -83,7 +83,16 @@ async function initializeTables() {
 
 const { setupWSHandlers } = require('./middleware/wsHandler');
 
-const server = http.createServer(app);
+// Create appropriate server based on environment
+let server;
+if (process.env.NODE_ENV === 'production') {
+  // In production, the hosting platform (like Render) handles HTTPS
+  server = http.createServer(app);
+} else {
+  // In development, use regular HTTP
+  server = http.createServer(app);
+}
+
 const { wss, broadcast } = setupWebSocket(server);
 
 // Make broadcast available globally
@@ -94,5 +103,6 @@ setupWSHandlers(wss);
 
 server.listen(PORT, async () => {
   await initializeTables();
-  console.log(`Server running at http://localhost:${PORT}`);
+  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+  console.log(`Server running at ${protocol}://localhost:${PORT}`);
 });

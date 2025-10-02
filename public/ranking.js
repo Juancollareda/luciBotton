@@ -2,15 +2,24 @@ export const Ranking = {
   ws: null,
   
   init() {
-    // Initialize WebSocket
-    this.ws = new WebSocket(`ws://${window.location.host}`);
-    
-    this.ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'rankingUpdate') {
-        this.updateTable(data.payload);
-      }
-    };
+    try {
+      // Use secure WebSocket (wss) if the page is loaded over HTTPS
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      this.ws = new WebSocket(`${protocol}//${window.location.host}`);
+      
+      this.ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'rankingUpdate') {
+          this.updateTable(data.payload);
+        }
+      };
+
+      this.ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+    } catch (error) {
+      console.error('Failed to initialize WebSocket:', error);
+    }
 
     this.ws.onerror = (error) => {
       console.error('WebSocket error:', error);
