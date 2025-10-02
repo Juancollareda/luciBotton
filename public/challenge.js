@@ -155,7 +155,7 @@ function createChallengeActions(challenge) {
 }
 
 // Accept challenge
-async function acceptChallenge(challengeId) {
+window.acceptChallenge = async function(challengeId) {
     try {
         const response = await fetch(`/api/challenge/${challengeId}/accept`, {
             method: 'POST'
@@ -263,16 +263,6 @@ function startClickingCompetition(challengeId) {
             });
     }
 }
-
-// Listen for WebSocket challenge notifications
-const socket = new WebSocket(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`);
-
-socket.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    if (data.type === 'challengeStart' && data.challengeId) {
-        startClickingCompetition(data.challengeId);
-    }
-};
 
 // Initialize refresh interval
 setInterval(refreshChallenges, 30000); // Refresh every 30 seconds
