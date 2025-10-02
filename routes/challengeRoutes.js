@@ -124,9 +124,12 @@ router.post('/api/challenge/:id/end', async (req, res) => {
         }
 
         const challenge = challengeResult.rows[0];
-        const totalPrize = challenge.bet_amount * 2;
+        const loserCountry = challenge.challenger_country === winnerCountry 
+            ? challenge.challenged_country 
+            : challenge.challenger_country;
 
-        // Award the prize to the winner
+        // Award the winner with their original bet + the loser's bet
+        const totalPrize = challenge.bet_amount * 2;
         await pool.query(
             'UPDATE country_clicks SET clicks = clicks + $1 WHERE country_code = $2',
             [totalPrize, winnerCountry]
