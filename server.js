@@ -2,13 +2,23 @@ const express = require('express');
 const path = require('path');
 const geoip = require('geoip-lite');
 const http = require('http');
+const https = require('https');
 require('dotenv').config();
 
 const pool = require('./db');  // ✅ use the shared pool
 const setupWebSocket = require('./websocket');
 
+const requireHTTPS = require('./middleware/requireHTTPS');
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Force HTTPS in production
+if (process.env.NODE_ENV === 'production') {
+    app.use(requireHTTPS);
+}
+
+// Enable trust proxy for Heroku/Render
+app.enable('trust proxy');
 
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
