@@ -11,16 +11,42 @@ router.get('/clicked', async (req, res) => {
   const ip = getIP(req);
   const geo = geoip.lookup(ip);
   const countryCode = geo?.country || 'XX';
+  console.log('Click from IP:', ip, 'Country:', countryCode); // Debug log
 
   try {
     const increment = boostActive ? 2 : 1;
+
+    // Start a transaction
+    await pool.query('BEGIN');
+
+    // Update global counter
     await pool.query('UPDATE counter SET count = count + $1 WHERE id = 1', [increment]);
+
+    // Make sure XX exists in the country_clicks table
     await pool.query(`
       INSERT INTO country_clicks (country_code, clicks)
-      VALUES ($1, $2)
-      ON CONFLICT (country_code)
-      DO UPDATE SET clicks = country_clicks.clicks + $2;
+      VALUES ('XX', 0)
+      ON CONFLICT (country_code) DO NOTHING;
+    `);
+
+    // Update country clicks with RETURNING to verify
+    const updateResult = await pool.query(`
+      UPDATE country_clicks 
+      SET clicks = clicks + $2 
+      WHERE country_code = $1
+      RETURNING country_code, clicks;
     `, [countryCode, increment]);
+
+    console.log('Updated country clicks:', updateResult.rows[0]); // Debug log
+
+    // Get updated rankings
+    const rankings = await pool.query('SELECT country_code, clicks FROM country_clicks ORDER BY clicks DESC');
+    
+    // Commit the transaction
+    await pool.query('COMMIT');
+
+    // Broadcast the update
+    global.broadcast('rankingUpdate', rankings.rows);
 
     const result = await pool.query('SELECT count FROM counter WHERE id = 1');
     res.send(`thanks for clicking. Total: ${result.rows[0].count}`);

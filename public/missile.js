@@ -6,14 +6,16 @@ export const Missile = {
     fetch('/missile-status')
       .then(res => res.json())
       .then(data => {
-        const missileBtn = document.getElementById('missileButton');
+        const missileBtn = document.getElementById('navMissileButton');
         const statusEl = document.getElementById('missileStatus');
 
         if (data.canLaunch) {
-          missileBtn.disabled = false;
+          missileBtn.style.opacity = '1';
+          missileBtn.style.pointerEvents = 'auto';
           statusEl.textContent = "Missile ready!";
         } else {
-          missileBtn.disabled = true;
+          missileBtn.style.opacity = '0.5';
+          missileBtn.style.pointerEvents = 'none';
           statusEl.textContent = `Missile already used. Next available in ${data.hours}h ${data.minutes}m ${data.seconds}s`;
         }
       })

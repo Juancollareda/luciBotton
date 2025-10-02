@@ -5,7 +5,82 @@
   <title>Luciela_dh wololo Counter</title>
   <link rel="icon" type="image/png" href="luci31.png">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+  <!-- Game features tooltip -->
+  <style>
+    .feature-tooltip {
+      position: fixed;
+      right: 20px;
+      top: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 15px;
+      border-radius: 10px;
+      color: white;
+      z-index: 1000;
+      max-width: 300px;
+      box-shadow: 0 0 20px rgba(255, 77, 77, 0.3);
+      animation: slideIn 0.5s ease-out;
+    }
+    .feature-tooltip h3 {
+      color: #ff4d4d;
+      margin-bottom: 10px;
+    }
+    .feature-tooltip ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .feature-tooltip li {
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .feature-tooltip img {
+      width: 30px;
+      height: 30px;
+      object-fit: contain;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .stats-panel {
+      position: fixed;
+      left: 20px;
+      top: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 10px;
+      color: white;
+      z-index: 1000;
+    }
+    .game-title {
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      animation: glow 2s infinite alternate;
+      color: white;
+      background: linear-gradient(45deg, #ff4d4d, #ff9999);
+      padding: 15px 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255, 77, 77, 0.5);
+      margin-bottom: 30px;
+      font-size: 3.5rem;
+      letter-spacing: 2px;
+      position: relative;
+      z-index: 10;
+    }
+    @keyframes glow {
+      from { 
+        text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ff4d4d;
+        box-shadow: 0 0 20px rgba(255, 77, 77, 0.5);
+      }
+      to { 
+        text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff4d4d;
+        box-shadow: 0 0 30px rgba(255, 77, 77, 0.8);
+      }
+    }
+  </style>
 </head>
 <!-- Fixed bottom nav -->
 <nav class="bottom-nav">
@@ -13,12 +88,45 @@
     <img src="bunbat missil.png" alt="Missile Icon" style="height: 100px; vertical-align:middle;">
   </button>
   <button id="navHelpButton">
-    <img src="bunbat help.png" alt="Boost Icon" style="height: 100px; vertical-align:middle;">
+    <img src="bunbat help.png" alt="Help Icon" style="height: 100px; vertical-align:middle;">
   </button>
   <button id="navClickerButton">
-    <img src="bunbat clicker.png" alt="Boost Icon" style="height: 100px; vertical-align:middle;">
+    <img src="bunbat clicker.png" alt="Challenge Icon" style="height: 100px; vertical-align:middle;" title="Country Challenge">
   </button>
 </nav>
+
+<!-- Challenge Modal -->
+<div id="challengeModal" class="modal">
+  <div class="modal-content challenge-content">
+    <span class="close-btn" id="closeChallenge">&times;</span>
+    <div class="challenge-tabs">
+      <button class="tab-button active" data-tab="create">Create Challenge</button>
+      <button class="tab-button" data-tab="active">Active Challenges</button>
+    </div>
+
+    <div class="tab-content" id="createChallenge">
+      <h2>Challenge Another Country</h2>
+      <div class="challenge-form">
+        <div class="input-group">
+          <label for="challengeCountry">Target Country:</label>
+          <input type="text" id="challengeCountry" maxlength="3" placeholder="e.g. USA, AR, JP">
+        </div>
+        <div class="input-group">
+          <label for="betAmount">Bet Amount:</label>
+          <input type="number" id="betAmount" min="1" placeholder="Enter clicks to bet">
+        </div>
+        <button id="createChallengeBtn" class="challenge-button">Create Challenge</button>
+      </div>
+    </div>
+
+    <div class="tab-content" id="activeChallenges" style="display: none;">
+      <h2>Your Challenges</h2>
+      <div id="challengesList" class="challenges-list">
+        <!-- Challenges will be populated here -->
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Modal for missile input -->
 <div id="missileModal" class="modal">
@@ -30,33 +138,61 @@
   </div>
 </div>
 <div id="HelpModal" class="modal">
-  <div class="modal-content">
-  <span class="close-btn" id="closeHelp">&times;</span>
-  <h2>How to Launch Missiles</h2>
-  <p>Follow these steps to launch a missile:</p>
-  <ol>
-    <li>
-      <strong>Click the missile button:</strong> 
-      <img src="bunbat missil.png" alt="Missile Icon" style="height: 100px; vertical-align:middle;">
-      A window will appear.
-    </li>
-    <li>
-      <strong>Enter a country code:</strong> 
-      <img src="inputcountry.png" alt="Input Country" style="height: 170px; vertical-align:middle;">
-      Type the 2-letter code (e.g., <strong>US</strong> or <strong>AR</strong>) and click Confirm 
-    </li>
-    <li>
-      <strong>Click the red button as fast as you can:</strong> 
-      <img src="Redbutton.png" alt="Frenzy Button" style="height: 190px; vertical-align:middle;">
-      The number of clicks in 30 seconds will determine your attack damage — that is, the number of clicks will be deducted from the chosen target. Be quick!
-    </li>
-  </ol>
-  <p><strong>Rules:</strong></p>
-  <ul>
-    <li>Each country can target another country once every 30minutes.</li>
-    <li>Good luck and have fun! also golden bunbat might apear can u click !</li>
-  </ul>
-</div>
+  <div class="modal-content help-content">
+    <span class="close-btn" id="closeHelp">&times;</span>
+    <h2 class="help-title">Game Guide</h2>
+    
+    <div class="help-section">
+      <h3>🎯 Basic Gameplay</h3>
+      <ul>
+        <li>Click the Luci gif to contribute to the global counter</li>
+        <li>Watch for the golden bunbat to appear for bonus points!</li>
+        <li>Your country's total is shown in the rankings</li>
+      </ul>
+    </div>
+
+    <div class="help-section">
+      <h3>⚔️ Country Challenges</h3>
+      <ol>
+        <li>Click the <img src="bunbat clicker.png" alt="Challenge" style="height: 30px; vertical-align:middle;"> button</li>
+        <li>Choose a country to challenge and bet your clicks</li>
+        <li>When the challenge is accepted, both countries have 30 seconds to click as fast as possible!</li>
+        <li>The winning country gets both bet amounts</li>
+      </ol>
+    </div>
+
+    <div class="help-section">
+      <h3>🚀 Missile Attacks</h3>
+      <ol>
+        <li>
+          <strong>Launch:</strong> 
+          <img src="bunbat missil.png" alt="Missile Icon" style="height: 30px; vertical-align:middle;">
+          Click to start
+        </li>
+        <li>
+          <strong>Target:</strong> 
+          Enter country code (e.g., <strong>US</strong>, <strong>AR</strong>)
+          <img src="inputcountry.png" alt="Input Country" style="height: 50px; vertical-align:middle;">
+        </li>
+        <li>
+          <strong>Attack:</strong> 
+          <img src="Redbutton.png" alt="Frenzy Button" style="height: 50px; vertical-align:middle;">
+          Click fast for 30 seconds - each click = 1 damage!
+        </li>
+      </ol>
+      <p class="help-note">⏰ Cooldown: 30 minutes between missile launches</p>
+    </div>
+
+    <div class="help-section">
+      <h3>💡 Pro Tips</h3>
+      <ul>
+        <li>Time your missile attacks when target countries have high click counts</li>
+        <li>Challenge countries with similar click counts for fair duels</li>
+        <li>Keep an eye on the rankings to spot potential targets</li>
+        <li>Golden bunbats appear randomly - don't miss them!</li>
+      </ul>
+    </div>
+  </div>
 </div>
 <div id="cooldownModal" class="modal">
   <div class="modal-content">
@@ -66,21 +202,50 @@
   </div>
 </div>
 <body>
-  <div class="left">
-    <div id="response"></div>
-    <div id="topFlag" style="margin-bottom: 15px;"></div>
-    <h1>Global wololo Counter</h1>
+  <!-- Game Features Tooltip -->
+  <div class="feature-tooltip">
+    <h3>🎮 Game Features</h3>
+    <ul>
+      <li>
+        <img src="bunbat clicker.png" alt="Challenge">
+        Challenge other countries to clicking duels!
+      </li>
+      <li>
+        <img src="bunbat missil.png" alt="Missile">
+        Launch missiles to steal clicks
+      </li>
+      <li>
+        <img src="bunbat golden.png" alt="Golden">
+        Click golden bunbats for bonus points
+      </li>
+      <li>
+        <img src="bunbat help.png" alt="Help">
+        Need help? Click for instructions
+      </li>
+    </ul>
+  </div>
 
-    <button class="gif-button" onclick="clickButton()">
+  <!-- Stats Panel -->
+  <div class="stats-panel">
+    <div id="topFlag" style="margin-bottom: 10px;"></div>
+    <div id="response" style="font-size: 2rem; margin-bottom: 5px;"></div>
+    <div id="response2" style="font-size: 1rem; color: #ffdd00;"></div>
+  </div>
+
+  <div class="left">
+    <div class="title-container">
+      <h1 class="game-title animate__animated animate__bounceIn">Global wololo Counter</h1>
+      <div class="title-decoration"></div>
+    </div>
+
+    <button class="gif-button" id="mainClickButton" title="Click me to add to the global counter!">
       <img
         alt="Click Me"
         src="https://media1.tenor.com/m/NVtYAkt7vQ0AAAAC/lucieladh-yipee-luci.gif"
         class="gif-image"
       />
     </button>
-     <img id="apple" src="bunbat golden.png" alt="Golden Apple">
-
-    <div id="response2"></div>
+    <img id="apple" src="bunbat golden.png" alt="Golden Bunbat" title="Click the golden bunbat for bonus points!">
     <!--Click button (make it droppable) 
 <div id="clickButtonDrop" ondrop="dropAutoclicker(event)" ondragover="allowDrop(event)">
   <button class="gif-button" id="mainClickButton" onclick="clickButton()">
@@ -146,5 +311,6 @@
   </div>
 
   <script type="module" src="main.js" defer></script>
+  <script src="challenge.js" defer></script>
 </body>
 </html>

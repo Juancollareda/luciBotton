@@ -1,9 +1,11 @@
 const express = require('express');
 const path = require('path');
 const geoip = require('geoip-lite');
+const http = require('http');
 require('dotenv').config();
 
 const pool = require('./db');  // ✅ use the shared pool
+const setupWebSocket = require('./websocket');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,12 +17,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 const { router: clickRoutes } = require('./routes/clickRoutes');
 const boostRoutes = require('./routes/boostRoutes');
 const missileRoutes = require('./routes/missileRoutes');
-const SpawnRoute = require('./routes/spawnRoutes'); // Import the spawn route
+const SpawnRoute = require('./routes/spawnRoutes');
+const challengeRoutes = require('./routes/challengeRoutes');
 
+app.use(express.json()); // Add middleware to parse JSON bodies
 app.use(clickRoutes);
 app.use(boostRoutes);
 app.use(missileRoutes);
-app.use(SpawnRoute); // Use the spawn route
+app.use(SpawnRoute);
+app.use(challengeRoutes);
 async function initializeTables() {
   try {
     await pool.query(`
@@ -47,12 +52,37 @@ async function initializeTables() {
         last_missile TIMESTAMP
       );
     `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS country_challenges (
+        id SERIAL PRIMARY KEY,
+        challenger_country TEXT NOT NULL,
+        challenged_country TEXT NOT NULL,
+        bet_amount INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        winner_country TEXT,
+        FOREIGN KEY (challenger_country) REFERENCES country_clicks(country_code),
+        FOREIGN KEY (challenged_country) REFERENCES country_clicks(country_code)
+      );
+    `);
   } catch (err) {
     console.error("Error initializing tables:", err);
   }
 }
 
-app.listen(PORT, async () => {
+const { setupWSHandlers } = require('./middleware/wsHandler');
+
+const server = http.createServer(app);
+const { wss, broadcast } = setupWebSocket(server);
+
+// Make broadcast available globally
+global.broadcast = broadcast;
+
+// Setup WebSocket handlers
+setupWSHandlers(wss);
+
+server.listen(PORT, async () => {
   await initializeTables();
   console.log(`Server running at http://localhost:${PORT}`);
 });
