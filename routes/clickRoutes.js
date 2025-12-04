@@ -1,6 +1,6 @@
 const express = require('express');
 const geoip = require('geoip-lite');
-const pool = require('../db');
+const databaseService = require('../services/databaseService');
 const getIP = require('../utils/getIP');
 
 const router = express.Router();
@@ -16,40 +16,22 @@ router.get('/clicked', async (req, res) => {
   try {
     const increment = boostActive ? 2 : 1;
 
-    // Start a transaction
-    await pool.query('BEGIN');
-
     // Update global counter
-    await pool.query('UPDATE counter SET count = count + $1 WHERE id = 1', [increment]);
+    await databaseService.updateGlobalCount(increment);
 
-    // Make sure XX exists in the country_clicks table
-    await pool.query(`
-      INSERT INTO country_clicks (country_code, clicks)
-      VALUES ('XX', 0)
-      ON CONFLICT (country_code) DO NOTHING;
-    `);
-
-    // Update country clicks with RETURNING to verify
-    const updateResult = await pool.query(`
-      UPDATE country_clicks 
-      SET clicks = clicks + $2 
-      WHERE country_code = $1
-      RETURNING country_code, clicks;
-    `, [countryCode, increment]);
-
-    console.log('Updated country clicks:', updateResult.rows[0]); // Debug log
+    // Update country clicks
+    await databaseService.updateCountryClicks(countryCode, increment);
 
     // Get updated rankings
-    const rankings = await pool.query('SELECT country_code, clicks FROM country_clicks ORDER BY clicks DESC');
-    
-    // Commit the transaction
-    await pool.query('COMMIT');
+    const rankings = await databaseService.getAllCountryClicks();
 
     // Broadcast the update
-    global.broadcast('rankingUpdate', rankings.rows);
+    if (global.broadcast) {
+      global.broadcast('rankingUpdate', rankings);
+    }
 
-    const result = await pool.query('SELECT count FROM counter WHERE id = 1');
-    res.send(`thanks for clicking. Total: ${result.rows[0].count}`);
+    const count = await databaseService.getGlobalCount();
+    res.send(`thanks for clicking. Total: ${count}`);
   } catch (err) {
     console.error(err);
     res.status(500).send('Error updating clicks.');
@@ -65,19 +47,13 @@ router.get('/clickedgolden', async (req, res) => {
   try {
     const increment = 1000; // golden touch value
 
-    // Always update both the country and the global counter together
-    await pool.query(`
-      INSERT INTO country_clicks (country_code, clicks)
-      VALUES ($1, $2)
-      ON CONFLICT (country_code)
-      DO UPDATE SET clicks = country_clicks.clicks + $2;
-    `, [countryCode, increment]);
+    // Update country clicks with golden value
+    await databaseService.updateCountryClicks(countryCode, increment);
 
-    // Update global counter **as sum of all country clicks** to avoid desync
-    const sumResult = await pool.query('SELECT SUM(clicks) AS total FROM country_clicks');
-    await pool.query('UPDATE counter SET count = $1 WHERE id = 1', [sumResult.rows[0].total]);
+    // Sync global counter to sum of all country clicks
+    const total = await databaseService.syncGlobalCountToCountrySum();
 
-    res.send(`Golden apple clicked! Total: ${sumResult.rows[0].total}`);
+    res.send(`Golden apple clicked! Total: ${total}`);
   } catch (err) {
     console.error(err);
     res.status(500).send('Error updating clicks.');
@@ -88,8 +64,8 @@ router.get('/clickedgolden', async (req, res) => {
 
 router.get('/count', async (req, res) => {
   try {
-    const result = await pool.query('SELECT count FROM counter WHERE id = 1');
-    res.send(`Button has been clicked ${result.rows[0].count} times`);
+    const count = await databaseService.getGlobalCount();
+    res.send(`Button has been clicked ${count} times`);
   } catch (err) {
     console.error(err);
     res.status(500).send('cant find counter');
@@ -98,8 +74,8 @@ router.get('/count', async (req, res) => {
 
 router.get('/paises', async (req, res) => {
   try {
-    const result = await pool.query('SELECT country_code, clicks FROM country_clicks ORDER BY clicks DESC');
-    res.json(result.rows);
+    const results = await databaseService.getAllCountryClicks();
+    res.json(results);
   } catch (err) {
     console.error(err);
     res.status(500).send('Error fetching country clicks');
@@ -111,7 +87,7 @@ router.delete('/erase-country', async (req, res) => {
   if (!country_code) return res.status(400).send('Missing country_code');
 
   try {
-    const result = await pool.query('DELETE FROM country_clicks WHERE country_code = $1', [country_code.toUpperCase()]);
+    const result = await databaseService.pool.query('DELETE FROM country_clicks WHERE country_code = $1', [country_code.toUpperCase()]);
     if (result.rowCount === 0) return res.status(404).send(`Country ${country_code} not found.`);
     res.send(`Country ${country_code} clicks erased successfully.`);
   } catch (err) {
@@ -128,14 +104,8 @@ router.patch('/adjust-click', async (req, res) => {
   if (!country_code || isNaN(amountInt)) return res.status(400).send('Invalid country_code or amount.');
 
   try {
-    await pool.query(`
-      INSERT INTO country_clicks (country_code, clicks)
-      VALUES ($1, $2)
-      ON CONFLICT (country_code)
-      DO UPDATE SET clicks = country_clicks.clicks + $2
-    `, [country_code.toUpperCase(), amountInt]);
-
-    await pool.query('UPDATE counter SET count = count + $1 WHERE id = 1', [amountInt]);
+    await databaseService.updateCountryClicks(country_code.toUpperCase(), amountInt);
+    await databaseService.updateGlobalCount(amountInt);
     res.send(`${amountInt >= 0 ? 'Added' : 'Subtracted'} ${Math.abs(amountInt)} click(s) for ${country_code}`);
   } catch (err) {
     console.error(err);

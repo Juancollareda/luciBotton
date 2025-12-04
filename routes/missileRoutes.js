@@ -1,6 +1,6 @@
 const express = require('express');
 const geoip = require('geoip-lite');
-const pool = require('../db');
+const databaseService = require('../services/databaseService');
 const getIP = require('../utils/getIP');
 
 const router = express.Router();
@@ -18,40 +18,35 @@ router.post('/missile', async (req, res) => {
 
   try {
     // Cooldown check
-    const missileRes = await pool.query(
-      'SELECT last_missile FROM country_missiles WHERE country_code = $1',
-      [userCountry]
-    );
-    const now = new Date();
-    if (missileRes.rows.length > 0 && missileRes.rows[0].last_missile) {
-      const last = new Date(missileRes.rows[0].last_missile);
-      if ((now - last) < MISSILE_COOLDOWN_MS) {
-        return res.status(403).send(`Your country ${userCountry} can only launch once per day.`);
-      }
+    const canLaunch = await databaseService.canLaunchMissile(userCountry, MISSILE_COOLDOWN_MS);
+    if (!canLaunch) {
+      return res.status(403).send(`Your country ${userCountry} can only launch once per day.`);
     }
 
     // Apply missile to target
-    const countryRes = await pool.query(
-      'SELECT clicks FROM country_clicks WHERE country_code = $1',
-      [targetCountry]
-    );
-    if (!countryRes.rows.length) return res.status(404).send(`No clicks recorded for ${targetCountry}`);
+    const targetClicks = await databaseService.getCountryClicks(targetCountry);
+    if (!targetClicks) return res.status(404).send(`No clicks recorded for ${targetCountry}`);
 
-    const { clicks } = countryRes.rows[0];
+    const { clicks } = targetClicks;
     const newClicks = Math.max(0, clicks - amount);
-    await pool.query('UPDATE country_clicks SET clicks = $1 WHERE country_code = $2', [newClicks, targetCountry]);
+    
+    // Update target country clicks
+    await databaseService.pool.query(
+      'UPDATE country_clicks SET clicks = $1 WHERE country_code = $2',
+      [newClicks, targetCountry]
+    );
+    
     const diff = clicks - newClicks;
-    if (diff > 0) await pool.query('UPDATE counter SET count = count - $1 WHERE id = 1', [diff]);
+    if (diff > 0) {
+      await databaseService.updateGlobalCount(-diff);
+    }
 
-    await pool.query(`
-      INSERT INTO country_missiles (country_code, last_missile)
-      VALUES ($1, $2)
-      ON CONFLICT (country_code) DO UPDATE SET last_missile = $2
-    `, [userCountry, now]);
+    // Update missile cooldown
+    await databaseService.updateLastMissileTime(userCountry);
 
     res.send(`Missile applied! ${diff} clicks removed from ${targetCountry}`);
   } catch (err) {
-    console.error(err);
+    console.error('Error applying missile:', err);
     res.status(500).send('Error applying missile');
   }
 });
@@ -62,17 +57,11 @@ router.get('/missile-status', async (req, res) => {
     const geo = geoip.lookup(ip);
     const userCountry = geo?.country || 'XX';
 
-    const missileRes = await pool.query(
-      'SELECT last_missile FROM country_missiles WHERE country_code = $1',
-      [userCountry]
-    );
+    const canLaunch = await databaseService.canLaunchMissile(userCountry, MISSILE_COOLDOWN_MS);
+    if (canLaunch) return res.json({ canLaunch: true });
 
-    if (!missileRes.rows.length || !missileRes.rows[0].last_missile) return res.json({ canLaunch: true });
-
-    const diff = Date.now() - new Date(missileRes.rows[0].last_missile).getTime();
-    
-
-    if (diff >= MISSILE_COOLDOWN_MS) return res.json({ canLaunch: true });
+    const lastMissile = await databaseService.getLastMissileTime(userCountry);
+    const diff = Date.now() - new Date(lastMissile).getTime();
 
     const remainingMs = MISSILE_COOLDOWN_MS - diff;
     const hours = Math.floor(remainingMs / (1000*60*60));
@@ -81,7 +70,7 @@ router.get('/missile-status', async (req, res) => {
 
     res.json({ canLaunch: false, hours, minutes, seconds });
   } catch (err) {
-    console.error(err);
+    console.error('Error checking missile status:', err);
     res.status(500).json({ canLaunch: false });
   }
 });
@@ -99,7 +88,7 @@ router.post('/reset-missile-cooldown', async (req, res) => {
 
   try {
     // Reset the missile cooldown for the specified country
-    const result = await pool.query(`
+    await databaseService.pool.query(`
       INSERT INTO country_missiles (country_code, last_missile)
       VALUES ($1, NULL)
       ON CONFLICT (country_code) DO UPDATE SET last_missile = NULL
@@ -107,7 +96,7 @@ router.post('/reset-missile-cooldown', async (req, res) => {
 
     res.send(`Missile cooldown for ${country_code.toUpperCase()} has been reset.`);
   } catch (err) {
-    console.error(err);
+    console.error('Error resetting missile cooldown:', err);
     res.status(500).send('Error resetting missile cooldown.');
   }
 });

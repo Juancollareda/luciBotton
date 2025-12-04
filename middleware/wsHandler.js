@@ -1,9 +1,9 @@
-const pool = require('../db');
+const databaseService = require('../services/databaseService');
 
 async function broadcastRankings(broadcast) {
     try {
-        const rankings = await pool.query('SELECT country_code, clicks FROM country_clicks ORDER BY clicks DESC');
-        broadcast('rankingUpdate', rankings.rows);
+        const rankings = await databaseService.getAllCountryClicks();
+        broadcast('rankingUpdate', rankings);
     } catch (err) {
         console.error('Error broadcasting rankings:', err);
     }
