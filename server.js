@@ -7,6 +7,7 @@ require('dotenv').config();
 
 const { pool, getPool } = require('./db');
 const setupWebSocket = require('./websocket');
+const { startResetScheduler } = require('./services/resetScheduler');
 
 const requireHTTPS = require('./middleware/requireHTTPS');
 const app = express();
@@ -30,6 +31,7 @@ const missileRoutes = require('./routes/missileRoutes');
 const SpawnRoute = require('./routes/spawnRoutes');
 const challengeRoutes = require('./routes/challengeRoutes');
 const countryRoutes = require('./routes/countryRoutes');
+const gameRoutes = require('./routes/gameRoutes');
 
 app.use(express.json()); // Add middleware to parse JSON bodies
 app.use(clickRoutes);
@@ -38,6 +40,7 @@ app.use(missileRoutes);
 app.use(SpawnRoute);
 app.use(challengeRoutes);
 app.use(countryRoutes);
+app.use('/api', gameRoutes);
 async function initializeTables() {
   try {
     await pool.query(`
@@ -78,6 +81,45 @@ async function initializeTables() {
         FOREIGN KEY (challenged_country) REFERENCES country_clicks(country_code)
       );
     `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS country_stats (
+        id SERIAL PRIMARY KEY,
+        country_code TEXT NOT NULL UNIQUE,
+        challenges_won INTEGER DEFAULT 0,
+        challenges_lost INTEGER DEFAULT 0,
+        total_missiles_launched INTEGER DEFAULT 0,
+        total_damage_taken INTEGER DEFAULT 0,
+        last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (country_code) REFERENCES country_clicks(country_code)
+      );
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS country_shields (
+        id SERIAL PRIMARY KEY,
+        country_code TEXT NOT NULL,
+        shield_active BOOLEAN DEFAULT true,
+        shield_expires TIMESTAMP NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (country_code) REFERENCES country_clicks(country_code)
+      );
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS seasonal_rankings (
+        id SERIAL PRIMARY KEY,
+        season_name TEXT NOT NULL,
+        country_code TEXT NOT NULL,
+        clicks INTEGER NOT NULL,
+        challenges_won INTEGER DEFAULT 0,
+        challenges_lost INTEGER DEFAULT 0,
+        total_missiles_launched INTEGER DEFAULT 0,
+        archived_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(season_name, country_code),
+        FOREIGN KEY (country_code) REFERENCES country_clicks(country_code)
+      );
+    `);
   } catch (err) {
     console.error("Error initializing tables:", err);
   }
@@ -111,6 +153,9 @@ async function startServer() {
     
     // Initialize tables
     await initializeTables();
+    
+    // Start reset scheduler
+    startResetScheduler();
     
     // Start listening
     server.listen(PORT, () => {

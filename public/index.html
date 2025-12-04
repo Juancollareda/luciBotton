@@ -190,6 +190,10 @@
           Click to start
         </li>
         <li>
+          <strong>Cost:</strong> 
+          Missiles cost <strong>50 clicks</strong> to launch
+        </li>
+        <li>
           <strong>Target:</strong> 
           Enter country code (e.g., <strong>US</strong>, <strong>AR</strong>)
           <img src="inputcountry.png" alt="Input Country" style="height: 50px; vertical-align:middle;">
@@ -197,10 +201,14 @@
         <li>
           <strong>Attack:</strong> 
           <img src="Redbutton.png" alt="Frenzy Button" style="height: 50px; vertical-align:middle;">
-          Click fast for 30 seconds - each click = 1 damage!
+          Click fast for 30 seconds - each click = 1 damage (capped at 50% of target's clicks)!
+        </li>
+        <li>
+          <strong>Shield:</strong> 
+          After being hit by a missile, countries get a 2-hour shield from further attacks
         </li>
       </ol>
-      <p class="help-note">⏰ Cooldown: 30 minutes between missile launches</p>
+      <p class="help-note">⏰ Cooldown: 30 minutes between missile launches per country</p>
     </div>
 
     <div class="help-section">
@@ -321,6 +329,8 @@
       <table>
         <thead>
           <tr>
+            <th>#</th>
+            <th>Tier</th>
             <th>Country</th>
             <th>Clicks</th>
           </tr>
