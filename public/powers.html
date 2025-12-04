@@ -2,249 +2,1152 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Activate Boost & Manage Countries</title>
+  <title>🎮 Admin Panel - Game Control</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
-      background-color: #f9f9f9;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    #boostBtn, #resetMissileBtn {
-      font-size: 20px;
-      padding: 15px 30px;
-      cursor: pointer;
-      color: white;
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: rgba(0, 0, 0, 0.8);
+      color: #ffd700;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .header h1 {
+      font-size: 32px;
+      margin-bottom: 5px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #667eea;
+      font-size: 18px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+    }
+
+    button {
+      padding: 10px 20px;
       border: none;
       border-radius: 5px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      transition: transform 0.2s, background-color 0.2s;
-      margin: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      font-size: 14px;
+      width: 100%;
     }
 
-    #boostBtn { background-color: #28a745; }
-    #boostBtn:hover { background-color: #218838; transform: scale(1.05); }
-    #boostBtn.active { background-color: #007bff; }
+    .btn-primary {
+      background-color: #667eea;
+      color: white;
+    }
 
-    #resetMissileBtn { background-color: #ffc107; color: black; }
-    #resetMissileBtn:hover { background-color: #e0a800; transform: scale(1.05); }
+    .btn-primary:hover {
+      background-color: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
 
-    #status { margin-top: 20px; font-size: 18px; color: #333; }
+    .btn-success {
+      background-color: #2ecc71;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background-color: #27ae60;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+    }
+
+    .btn-warning {
+      background-color: #f39c12;
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background-color: #e67e22;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+    }
+
+    .btn-danger {
+      background-color: #e74c3c;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+    }
+
+    .btn-info {
+      background-color: #3498db;
+      color: white;
+    }
+
+    .btn-info:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+    }
+
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .status.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .status.info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
 
     table {
-      margin: 20px auto;
+      width: 100%;
       border-collapse: collapse;
-      width: 80%;
-      max-width: 600px;
+      margin-top: 10px;
+      font-size: 13px;
     }
 
     th, td {
-      padding: 8px 12px;
-      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
     }
 
-    th { background-color: #007bff; color: white; }
-    td.clicksCell { cursor: text; color: blue; text-decoration: underline; }
+    th {
+      background-color: #667eea;
+      color: white;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background-color: #f5f5f5;
+    }
+
+    td.clicksCell {
+      cursor: text;
+      color: #667eea;
+      text-decoration: underline;
+    }
 
     button.deleteBtn {
-      background-color: #dc3545;
+      background-color: #e74c3c;
       color: white;
       border: none;
       padding: 5px 10px;
       border-radius: 4px;
       cursor: pointer;
+      font-size: 12px;
+      width: auto;
     }
 
-    button.deleteBtn:hover { background-color: #c82333; }
-
-    /* New section for resetting missile cooldown by country */
-    #resetCountrySection {
-      margin-top: 20px;
+    button.deleteBtn:hover {
+      background-color: #c0392b;
     }
 
-    #countryCodeInput {
+    .button-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .button-group.full {
+      grid-template-columns: 1fr;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .stat-box {
+      background-color: #f0f0f0;
       padding: 10px;
-      font-size: 16px;
-      width: 150px;
-      margin-right: 10px;
+      border-radius: 5px;
+      text-align: center;
     }
 
-    #resetCountryBtn {
-      font-size: 16px;
-      padding: 10px 20px;
-      background-color: #007bff;
-      color: white;
+    .stat-box .label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .stat-box .value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .section-divider {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 10px 15px;
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      background-color: rgba(255, 255, 255, 0.7);
+      color: #333;
+      font-weight: 600;
+      transition: all 0.3s;
     }
 
-    #resetCountryBtn:hover {
-      background-color: #0056b3;
+    .tab-btn.active {
+      background-color: #667eea;
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+      width: 90%;
+    }
+
+    .modal-content h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+    }
+
+    .close-btn {
+      float: right;
+      font-size: 24px;
+      cursor: pointer;
+      color: #999;
+      background: none;
+      border: none;
+      width: auto;
+      padding: 0;
+    }
+
+    .close-btn:hover {
+      color: #333;
     }
   </style>
 </head>
 <body>
-  <h1>Activate Boost & Manage Countries</h1>
+  <div class="container">
+    <div class="header">
+      <h1>🎮 Admin Control Panel</h1>
+      <p>Test all game features and manage gameplay</p>
+    </div>
 
-  <button id="boostBtn">Activate Boost</button>
-  <button id="resetMissileBtn">Reset Missile Cooldown</button>
-  <div id="status"></div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('overview')">📊 Overview</button>
+      <button class="tab-btn" onclick="switchTab('boost')">⚡ Boost & Powers</button>
+      <button class="tab-btn" onclick="switchTab('missile')">🚀 Missile System</button>
+      <button class="tab-btn" onclick="switchTab('challenge')">⚔️ Challenges</button>
+      <button class="tab-btn" onclick="switchTab('shield')">🛡️ Shields</button>
+      <button class="tab-btn" onclick="switchTab('countries')">🌍 Countries</button>
+      <button class="tab-btn" onclick="switchTab('testing')">🧪 Testing Tools</button>
+    </div>
 
-  <h2>Country Clicks</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Country</th>
-        <th>Clicks</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="countryTable"></tbody>
-  </table>
+    <!-- OVERVIEW TAB -->
+    <div id="overview" class="tab-content active">
+      <div class="grid">
+        <div class="card">
+          <h2>Server Status</h2>
+          <div class="stats">
+            <div class="stat-box">
+              <div class="label">Connected Players</div>
+              <div class="value" id="connectedPlayers">-</div>
+            </div>
+            <div class="stat-box">
+              <div class="label">Active Countries</div>
+              <div class="value" id="activeCountries">-</div>
+            </div>
+          </div>
+          <button class="btn-info" onclick="checkServerStatus()">🔄 Refresh Status</button>
+        </div>
 
-  <!-- New Section to Reset Missile Cooldown by Country -->
-  <div id="resetCountrySection">
-    <h3>Reset Missile Cooldown by Country</h3>
-    <input type="text" id="countryCodeInput" placeholder="Country Code (e.g., US)">
-    <button id="resetCountryBtn">Reset Cooldown</button>
+        <div class="card">
+          <h2>Quick Actions</h2>
+          <div class="button-group">
+            <button class="btn-success" onclick="resetAllMissiles()">Reset All Missiles</button>
+            <button class="btn-warning" onclick="clearAllShields()">Clear All Shields</button>
+          </div>
+          <div class="button-group">
+            <button class="btn-danger" onclick="resetDailyMissiles()">Daily Reset</button>
+            <button class="btn-danger" onclick="resetWeeklyStats()">Weekly Reset</button>
+          </div>
+          <div id="statusOverview" class="status"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOOST & POWERS TAB -->
+    <div id="boost" class="tab-content">
+      <div class="grid">
+        <div class="card">
+          <h2>⚡ Activate Boost</h2>
+          <p style="margin-bottom: 15px; color: #666; font-size: 14px;">Activate 2x click multiplier for 30 seconds</p>
+          <button class="btn-success" onclick="activateBoost()">Activate Boost Now</button>
+          <div id="boostStatus" class="status"></div>
+        </div>
+
+        <div class="card">
+          <h2>📊 Golden Bunbat</h2>
+          <p style="margin-bottom: 15px; color: #666; font-size: 14px;">10-second multi-click window with no cooldown</p>
+          <button class="btn-success" onclick="activateGoldenBunbat()">Activate Golden Bunbat</button>
+          <div id="goldenStatus" class="status"></div>
+        </div>
+
+        <div class="card">
+          <h2>💰 Add Clicks to Country</h2>
+          <div class="form-group">
+            <label>Country Code</label>
+            <input type="text" id="addClicksCountry" placeholder="e.g., US" maxlength="2">
+          </div>
+          <div class="form-group">
+            <label>Amount</label>
+            <input type="number" id="addClicksAmount" placeholder="100" min="0">
+          </div>
+          <button class="btn-primary" onclick="addClicksToCountry()">Add Clicks</button>
+          <div id="addClicksStatus" class="status"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MISSILE TAB -->
+    <div id="missile" class="tab-content">
+      <div class="grid">
+        <div class="card">
+          <h2>🚀 Reset Missile Cooldown</h2>
+          <div class="form-group">
+            <label>Country Code (leave empty for all)</label>
+            <input type="text" id="missileCountry" placeholder="e.g., US" maxlength="2">
+          </div>
+          <button class="btn-warning" onclick="resetMissileCooldown()">Reset Cooldown</button>
+          <div id="missileStatus" class="status"></div>
+        </div>
+
+        <div class="card">
+          <h2>📋 Missile Settings</h2>
+          <div class="stat-box">
+            <div class="label">Cost per Launch</div>
+            <div class="value">50 clicks</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">Max Damage</div>
+            <div class="value">50% of target</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">Cooldown Period</div>
+            <div class="value">30 minutes</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">Shield Duration</div>
+            <div class="value">2 hours</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>🧪 Test Missile Launch</h2>
+          <div class="form-group">
+            <label>Attacker Country</label>
+            <input type="text" id="missileAttacker" placeholder="e.g., US" maxlength="2">
+          </div>
+          <div class="form-group">
+            <label>Target Country</label>
+            <input type="text" id="missileTarget" placeholder="e.g., AR" maxlength="2">
+          </div>
+          <button class="btn-primary" onclick="testMissileLaunch()">Test Launch</button>
+          <div id="testMissileStatus" class="status"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHALLENGE TAB -->
+    <div id="challenge" class="tab-content">
+      <div class="grid">
+        <div class="card">
+          <h2>⚔️ Create Test Challenge</h2>
+          <div class="form-group">
+            <label>Challenger Country</label>
+            <input type="text" id="challengerCountry" placeholder="e.g., US" maxlength="2">
+          </div>
+          <div class="form-group">
+            <label>Challenged Country</label>
+            <input type="text" id="challengedCountry" placeholder="e.g., AR" maxlength="2">
+          </div>
+          <div class="form-group">
+            <label>Bet Amount</label>
+            <input type="number" id="challengeBet" placeholder="100" min="1">
+          </div>
+          <button class="btn-primary" onclick="createTestChallenge()">Create Challenge</button>
+          <div id="challengeCreateStatus" class="status"></div>
+        </div>
+
+        <div class="card">
+          <h2>📊 Challenge Settings</h2>
+          <div class="stat-box">
+            <div class="label">Duel Duration</div>
+            <div class="value">30 seconds</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">Winner Prize</div>
+            <div class="value">2x Bet</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">Tie Result</div>
+            <div class="value">Bets Returned</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">Tier Matching</div>
+            <div class="value">Warned</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>🧪 Auto Test Duel</h2>
+          <p style="margin-bottom: 15px; color: #666; font-size: 14px;">Simulate a complete challenge from creation to completion</p>
+          <button class="btn-info" onclick="autoTestChallenge()">Run Auto Test</button>
+          <div id="autoTestStatus" class="status"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHIELD TAB -->
+    <div id="shield" class="tab-content">
+      <div class="grid">
+        <div class="card">
+          <h2>🛡️ Grant Shield</h2>
+          <div class="form-group">
+            <label>Country Code</label>
+            <input type="text" id="shieldCountry" placeholder="e.g., US" maxlength="2">
+          </div>
+          <div class="form-group">
+            <label>Duration (minutes)</label>
+            <input type="number" id="shieldDuration" placeholder="120" min="1" value="120">
+          </div>
+          <button class="btn-success" onclick="grantShield()">Grant Shield</button>
+          <div id="shieldStatus" class="status"></div>
+        </div>
+
+        <div class="card">
+          <h2>🔍 Check Shield Status</h2>
+          <div class="form-group">
+            <label>Country Code</label>
+            <input type="text" id="checkShieldCountry" placeholder="e.g., US" maxlength="2">
+          </div>
+          <button class="btn-info" onclick="checkShieldStatus()">Check Status</button>
+          <div id="checkShieldStatus" class="status"></div>
+        </div>
+
+        <div class="card">
+          <h2>🚫 Remove All Shields</h2>
+          <p style="margin-bottom: 15px; color: #666; font-size: 14px;">Remove active shields from all countries</p>
+          <button class="btn-danger" onclick="removeAllShields()">Remove All Shields</button>
+          <div id="removeShieldStatus" class="status"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COUNTRIES TAB -->
+    <div id="countries" class="tab-content">
+      <div class="card">
+        <h2>🌍 Manage Countries</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Country</th>
+              <th>Clicks</th>
+              <th>Tier</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="countryTable"></tbody>
+        </table>
+      </div>
+
+      <div class="card section-divider">
+        <h2>➕ Add Country</h2>
+        <div class="form-group">
+          <label>Country Code</label>
+          <input type="text" id="newCountryCode" placeholder="e.g., US" maxlength="2">
+        </div>
+        <div class="form-group">
+          <label>Initial Clicks</label>
+          <input type="number" id="newCountryClicks" placeholder="1000" min="0" value="1000">
+        </div>
+        <button class="btn-success" onclick="addCountry()">Add Country</button>
+        <div id="addCountryStatus" class="status"></div>
+      </div>
+
+      <div class="card">
+        <h2>🗑️ Manage Specific Country</h2>
+        <div class="form-group">
+          <label>Country Code</label>
+          <input type="text" id="manageCountryCode" placeholder="e.g., US" maxlength="2">
+        </div>
+        <div class="form-group">
+          <label>Adjustment Amount</label>
+          <input type="number" id="adjustAmount" placeholder="100" value="100">
+        </div>
+        <div class="button-group">
+          <button class="btn-warning" onclick="adjustClicks(1)">➕ Add</button>
+          <button class="btn-warning" onclick="adjustClicks(-1)">➖ Subtract</button>
+        </div>
+        <button class="btn-danger full-width" onclick="deleteCountry()">🗑️ Delete Country</button>
+        <div id="manageCountryStatus" class="status"></div>
+      </div>
+    </div>
+
+    <!-- TESTING TOOLS TAB -->
+    <div id="testing" class="tab-content">
+      <div class="grid">
+        <div class="card">
+          <h2>🧪 Simulate Click</h2>
+          <div class="form-group">
+            <label>Country Code</label>
+            <input type="text" id="simCountry" placeholder="e.g., US" maxlength="2">
+          </div>
+          <div class="form-group">
+            <label>Number of Clicks</label>
+            <input type="number" id="simClicks" placeholder="1" min="1" value="1">
+          </div>
+          <button class="btn-primary" onclick="simulateClicks()">Simulate Clicks</button>
+          <div id="simStatus" class="status"></div>
+        </div>
+
+        <div class="card">
+          <h2>📈 Stress Test</h2>
+          <p style="margin-bottom: 15px; color: #666; font-size: 14px;">Add 1000 clicks to each country</p>
+          <button class="btn-warning" onclick="stressTest()">Run Stress Test</button>
+          <div id="stressStatus" class="status"></div>
+        </div>
+
+        <div class="card">
+          <h2>🔄 Full Game Reset</h2>
+          <p style="margin-bottom: 15px; color: #666; font-size: 14px;">⚠️ WARNING: This resets all countries and their data</p>
+          <button class="btn-danger" onclick="confirmFullReset()">Full Game Reset</button>
+          <div id="resetStatus" class="status"></div>
+        </div>
+
+        <div class="card">
+          <h2>📊 Game Statistics</h2>
+          <button class="btn-info" onclick="getGameStats()">Load Statistics</button>
+          <div id="gameStats"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="modal">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeModal()">×</button>
+      <h2 id="modalTitle">Confirm Action</h2>
+      <p id="modalMessage"></p>
+      <div class="button-group">
+        <button class="btn-danger" onclick="confirmAction()">Confirm</button>
+        <button class="btn-primary" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    const boostBtn = document.getElementById('boostBtn');
-    const resetMissileBtn = document.getElementById('resetMissileBtn');
-    const resetCountryBtn = document.getElementById('resetCountryBtn');
-    const countryCodeInput = document.getElementById('countryCodeInput');
-    const statusEl = document.getElementById('status');
-    const countryTable = document.getElementById('countryTable');
     const ADMIN_PASSWORD = "supersecret123123ret123123";
-    let countdownInterval;
+    let pendingAction = null;
 
-    // --- Boost button ---
-    boostBtn.addEventListener('click', async () => {
+    function switchTab(tabName) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      // Remove active class from all buttons
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Show selected tab
+      document.getElementById(tabName).classList.add('active');
+      
+      // Mark button as active
+      event.target.classList.add('active');
+      
+      // Load content based on tab
+      if (tabName === 'countries') {
+        loadCountries();
+      } else if (tabName === 'overview') {
+        checkServerStatus();
+      }
+    }
+
+    function showStatus(elementId, message, type = 'info') {
+      const el = document.getElementById(elementId);
+      el.textContent = message;
+      el.className = `status ${type}`;
+      el.style.display = 'block';
+    }
+
+    function showModal(title, message, action) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalMessage').textContent = message;
+      document.getElementById('confirmModal').classList.add('active');
+      pendingAction = action;
+    }
+
+    function closeModal() {
+      document.getElementById('confirmModal').classList.remove('active');
+      pendingAction = null;
+    }
+
+    function confirmAction() {
+      if (pendingAction) {
+        pendingAction();
+      }
+      closeModal();
+    }
+
+    // ==================== BOOST FUNCTIONS ====================
+
+    async function activateBoost() {
       try {
         const res = await fetch('/boost');
         const data = await res.json();
-        boostBtn.classList.add('active');
-        boostBtn.textContent = 'Boost Active!';
-        let timeLeft = data.expiresIn;
-        statusEl.textContent = `Boost activated! Time left: ${timeLeft}s`;
-
-        if (countdownInterval) clearInterval(countdownInterval);
-        countdownInterval = setInterval(() => {
-          timeLeft--;
-          if (timeLeft > 0) {
-            statusEl.textContent = `Boost activated! Time left: ${timeLeft}s`;
-          } else {
-            clearInterval(countdownInterval);
-            boostBtn.classList.remove('active');
-            boostBtn.textContent = 'Activate Boost';
-            statusEl.textContent = 'Boost expired!';
-          }
-        }, 1000);
+        showStatus('boostStatus', `✓ Boost activated! ${data.expiresIn}s remaining`, 'success');
       } catch (err) {
-        statusEl.textContent = 'Error activating boost';
+        showStatus('boostStatus', `✗ Error: ${err.message}`, 'error');
       }
-    });
+    }
 
-    // --- Reset missile cooldown button ---
-    resetMissileBtn.addEventListener('click', async () => {
+    async function activateGoldenBunbat() {
       try {
-        const res = await fetch(`/reset-missile?password=${ADMIN_PASSWORD}`, { method: 'POST' });
-        const text = await res.text();
-        alert(text);
-
-        // Enable missile button on main page if it exists
-        const missileBtn = parent.document.getElementById('missileButton');
-        if (missileBtn) missileBtn.disabled = false;
-
-        // Temporary feedback on the reset button
-        resetMissileBtn.textContent = 'Missile Reset!';
-        setTimeout(() => resetMissileBtn.textContent = 'Reset Missile Cooldown', 2000);
+        const res = await fetch('/golden-bunbat');
+        const data = await res.json();
+        showStatus('goldenStatus', `✓ ${data.message}`, 'success');
       } catch (err) {
-        alert('Error resetting missile cooldown');
+        showStatus('goldenStatus', `✗ Error: ${err.message}`, 'error');
       }
-    });
+    }
 
-    // --- Reset missile cooldown for specific country ---
-    resetCountryBtn.addEventListener('click', async () => {
-      const countryCode = countryCodeInput.value.trim().toUpperCase();
-      if (!countryCode) {
-        alert('Please enter a country code');
+    async function addClicksToCountry() {
+      const country = document.getElementById('addClicksCountry').value.toUpperCase();
+      const amount = parseInt(document.getElementById('addClicksAmount').value);
+
+      if (!country || !amount) {
+        showStatus('addClicksStatus', '✗ Please fill all fields', 'error');
         return;
       }
 
       try {
-        const res = await fetch(`/reset-missile-cooldown?password=${ADMIN_PASSWORD}&country_code=${countryCode}`, { method: 'POST' });
-        const text = await res.text();
-        alert(text);
+        const res = await fetch(`/adjust-click?password=${ADMIN_PASSWORD}&country_code=${country}&amount=${amount}`, {
+          method: 'PATCH'
+        });
+        const data = await res.text();
+        showStatus('addClicksStatus', `✓ ${data}`, 'success');
+        document.getElementById('addClicksCountry').value = '';
+        document.getElementById('addClicksAmount').value = '';
       } catch (err) {
-        alert('Error resetting missile cooldown for the specified country');
+        showStatus('addClicksStatus', `✗ Error: ${err.message}`, 'error');
       }
-    });
+    }
 
-    // --- Fetch and display country clicks ---
+    // ==================== MISSILE FUNCTIONS ====================
+
+    async function resetMissileCooldown() {
+      const country = document.getElementById('missileCountry').value.toUpperCase() || 'ALL';
+      try {
+        const endpoint = country === 'ALL' ? 
+          `/reset-missile?password=${ADMIN_PASSWORD}` :
+          `/reset-missile-cooldown?password=${ADMIN_PASSWORD}&country_code=${country}`;
+        
+        const res = await fetch(endpoint, { method: 'POST' });
+        const data = await res.text();
+        showStatus('missileStatus', `✓ ${data}`, 'success');
+        document.getElementById('missileCountry').value = '';
+      } catch (err) {
+        showStatus('missileStatus', `✗ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function testMissileLaunch() {
+      const attacker = document.getElementById('missileAttacker').value.toUpperCase();
+      const target = document.getElementById('missileTarget').value.toUpperCase();
+
+      if (!attacker || !target) {
+        showStatus('testMissileStatus', '✗ Please fill all fields', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/missile/launch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetCountry: target, damage: 25 })
+        });
+        const data = await res.json();
+        showStatus('testMissileStatus', `✓ ${data.message || data.error}`, 'success');
+      } catch (err) {
+        showStatus('testMissileStatus', `✗ Error: ${err.message}`, 'error');
+      }
+    }
+
+    // ==================== CHALLENGE FUNCTIONS ====================
+
+    async function createTestChallenge() {
+      const challenger = document.getElementById('challengerCountry').value.toUpperCase();
+      const challenged = document.getElementById('challengedCountry').value.toUpperCase();
+      const bet = parseInt(document.getElementById('challengeBet').value);
+
+      if (!challenger || !challenged || !bet) {
+        showStatus('challengeCreateStatus', '✗ Please fill all fields', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/challenge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ challengedCountry: challenged, betAmount: bet })
+        });
+        const data = await res.json();
+        showStatus('challengeCreateStatus', `✓ Challenge created! ID: ${data.challengeId}`, 'success');
+      } catch (err) {
+        showStatus('challengeCreateStatus', `✗ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function autoTestChallenge() {
+      showStatus('autoTestStatus', '⏳ Running auto test...', 'info');
+      // This would need backend support to auto-simulate the duel
+      showStatus('autoTestStatus', 'ℹ️ Create a challenge above to test manually', 'info');
+    }
+
+    // ==================== SHIELD FUNCTIONS ====================
+
+    async function grantShield() {
+      const country = document.getElementById('shieldCountry').value.toUpperCase();
+      const duration = parseInt(document.getElementById('shieldDuration').value) || 120;
+
+      if (!country) {
+        showStatus('shieldStatus', '✗ Please enter a country code', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/shield/grant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ countryCode: country, durationMinutes: duration })
+        });
+        const data = await res.json();
+        showStatus('shieldStatus', `✓ Shield granted for ${duration}m`, 'success');
+        document.getElementById('shieldCountry').value = '';
+      } catch (err) {
+        showStatus('shieldStatus', `✗ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function checkShieldStatus() {
+      const country = document.getElementById('checkShieldCountry').value.toUpperCase();
+
+      if (!country) {
+        showStatus('checkShieldStatus', '✗ Please enter a country code', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/shield/status`);
+        const data = await res.json();
+        const msg = data.isShielded ? 
+          `✓ ${country} is shielded. ${data.message}` :
+          `ℹ️ ${country} has no active shield`;
+        showStatus('checkShieldStatus', msg, data.isShielded ? 'success' : 'info');
+      } catch (err) {
+        showStatus('checkShieldStatus', `✗ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function removeAllShields() {
+      showModal('Remove All Shields', 'Are you sure? This will remove shields from all countries.', async () => {
+        try {
+          const res = await fetch(`/remove-all-shields?password=${ADMIN_PASSWORD}`, { method: 'POST' });
+          const data = await res.text();
+          showStatus('removeShieldStatus', `✓ ${data}`, 'success');
+        } catch (err) {
+          showStatus('removeShieldStatus', `✗ Error: ${err.message}`, 'error');
+        }
+      });
+    }
+
+    // ==================== COUNTRY FUNCTIONS ====================
+
     async function loadCountries() {
       try {
         const res = await fetch('/paises');
         const countries = await res.json();
-        countryTable.innerHTML = '';
+        const table = document.getElementById('countryTable');
+        table.innerHTML = '';
 
-        countries.forEach(c => {
+        countries.forEach(country => {
+          const tier = getTierInfo(country.clicks);
           const tr = document.createElement('tr');
-
           tr.innerHTML = `
-            <td>${c.country_code}</td>
-            <td class="clicksCell" contenteditable="true">${c.clicks}</td>
-            <td><button class="deleteBtn">Delete</button></td>
+            <td>${country.country_code}</td>
+            <td class="clicksCell" contenteditable="true" data-country="${country.country_code}">${country.clicks}</td>
+            <td>${tier.icon} ${tier.name}</td>
+            <td><button class="deleteBtn" onclick="deleteCountryByCode('${country.country_code}')">Delete</button></td>
           `;
 
-          // Delete button
-          tr.querySelector('.deleteBtn').addEventListener('click', async () => {
-            if (!confirm(`Erase ${c.country_code} and its clicks?`)) return;
-            try {
-              const eraseRes = await fetch(`/erase-country?password=${ADMIN_PASSWORD}&country_code=${c.country_code}`, {
-                method: 'DELETE'
-              });
-              const text = await eraseRes.text();
-              alert(text);
-              loadCountries();
-            } catch (err) {
-              alert('Error erasing country');
-            }
-          });
-
-          // Inline clicks editing
-          const clicksCell = tr.querySelector('.clicksCell');
-          clicksCell.addEventListener('blur', async () => {
-            let newValue = parseInt(clicksCell.innerText);
+          tr.querySelector('.clicksCell').addEventListener('blur', async (e) => {
+            const newValue = parseInt(e.target.innerText);
             if (isNaN(newValue)) {
-              alert('Invalid number');
-              loadCountries(); 
+              loadCountries();
               return;
             }
-            const diff = newValue - c.clicks;
+            const countryCode = e.target.dataset.country;
+            const diff = newValue - country.clicks;
+            
             try {
-              const patchRes = await fetch(`/adjust-click?password=${ADMIN_PASSWORD}&country_code=${c.country_code}&amount=${diff}`, {
+              await fetch(`/adjust-click?password=${ADMIN_PASSWORD}&country_code=${countryCode}&amount=${diff}`, {
                 method: 'PATCH'
               });
-              const text = await patchRes.text();
-              alert(text);
               loadCountries();
             } catch (err) {
-              alert('Error adjusting clicks');
+              console.error(err);
             }
           });
 
-          countryTable.appendChild(tr);
+          table.appendChild(tr);
         });
       } catch (err) {
-        console.error(err);
-        countryTable.innerHTML = '<tr><td colspan="3">Error loading countries</td></tr>';
+        console.error('Error loading countries:', err);
       }
     }
 
+    function getTierInfo(clicks) {
+      if (clicks < 1000) return { name: 'Bronze', icon: '🥉', color: '#CD7F32' };
+      if (clicks < 10000) return { name: 'Silver', icon: '🥈', color: '#C0C0C0' };
+      if (clicks < 100000) return { name: 'Gold', icon: '🥇', color: '#FFD700' };
+      return { name: 'Legendary', icon: '💎', color: '#FF1493' };
+    }
+
+    async function addCountry() {
+      const code = document.getElementById('newCountryCode').value.toUpperCase();
+      const clicks = parseInt(document.getElementById('newCountryClicks').value) || 1000;
+
+      if (!code) {
+        showStatus('addCountryStatus', '✗ Please enter a country code', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch('/paises', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ country_code: code, clicks: clicks })
+        });
+        const data = await res.json();
+        showStatus('addCountryStatus', `✓ Country ${code} added with ${clicks} clicks`, 'success');
+        document.getElementById('newCountryCode').value = '';
+        document.getElementById('newCountryClicks').value = '1000';
+        loadCountries();
+      } catch (err) {
+        showStatus('addCountryStatus', `✗ Error: ${err.message}`, 'error');
+      }
+    }
+
+    function adjustClicks(multiplier) {
+      const countryCode = document.getElementById('manageCountryCode').value.toUpperCase();
+      const amount = parseInt(document.getElementById('adjustAmount').value) || 0;
+
+      if (!countryCode) {
+        showStatus('manageCountryStatus', '✗ Please enter a country code', 'error');
+        return;
+      }
+
+      const finalAmount = amount * multiplier;
+      fetch(`/adjust-click?password=${ADMIN_PASSWORD}&country_code=${countryCode}&amount=${finalAmount}`, {
+        method: 'PATCH'
+      })
+        .then(res => res.text())
+        .then(data => {
+          showStatus('manageCountryStatus', `✓ ${data}`, 'success');
+          loadCountries();
+        })
+        .catch(err => showStatus('manageCountryStatus', `✗ Error: ${err.message}`, 'error'));
+    }
+
+    function deleteCountryByCode(code) {
+      showModal(`Delete ${code}`, `Are you sure you want to delete ${code} and all its data?`, async () => {
+        try {
+          const res = await fetch(`/erase-country?password=${ADMIN_PASSWORD}&country_code=${code}`, {
+            method: 'DELETE'
+          });
+          const data = await res.text();
+          showStatus('manageCountryStatus', `✓ ${data}`, 'success');
+          loadCountries();
+        } catch (err) {
+          showStatus('manageCountryStatus', `✗ Error: ${err.message}`, 'error');
+        }
+      });
+    }
+
+    function deleteCountry() {
+      const code = document.getElementById('manageCountryCode').value.toUpperCase();
+      if (!code) {
+        showStatus('manageCountryStatus', '✗ Please enter a country code', 'error');
+        return;
+      }
+      deleteCountryByCode(code);
+    }
+
+    // ==================== TESTING FUNCTIONS ====================
+
+    async function simulateClicks() {
+      const country = document.getElementById('simCountry').value.toUpperCase();
+      const clicks = parseInt(document.getElementById('simClicks').value);
+
+      if (!country || !clicks) {
+        showStatus('simStatus', '✗ Please fill all fields', 'error');
+        return;
+      }
+
+      try {
+        for (let i = 0; i < clicks; i++) {
+          await fetch(`/click?country=${country}`);
+        }
+        showStatus('simStatus', `✓ Simulated ${clicks} clicks for ${country}`, 'success');
+      } catch (err) {
+        showStatus('simStatus', `✗ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function stressTest() {
+      try {
+        const res = await fetch('/paises');
+        const countries = await res.json();
+
+        for (const country of countries) {
+          await fetch(`/adjust-click?password=${ADMIN_PASSWORD}&country_code=${country.country_code}&amount=1000`, {
+            method: 'PATCH'
+          });
+        }
+        showStatus('stressStatus', `✓ Added 1000 clicks to ${countries.length} countries`, 'success');
+        loadCountries();
+      } catch (err) {
+        showStatus('stressStatus', `✗ Error: ${err.message}`, 'error');
+      }
+    }
+
+    function confirmFullReset() {
+      showModal('Full Game Reset', '⚠️ WARNING: This will delete ALL countries, challenges, and stats. Are you absolutely sure?', async () => {
+        try {
+          showStatus('resetStatus', '⏳ Resetting game...', 'info');
+          
+          // Call backend to handle full reset with foreign key cleanup
+          const res = await fetch(`/api/admin/full-reset?password=${ADMIN_PASSWORD}`, {
+            method: 'POST'
+          });
+          
+          if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.error || 'Reset failed');
+          }
+          
+          const data = await res.json();
+          showStatus('resetStatus', `✓ ${data.message}`, 'success');
+          
+          // Reload after a short delay
+          setTimeout(() => {
+            loadCountries();
+            document.getElementById('newCountryCode').value = '';
+            document.getElementById('newCountryClicks').value = '1000';
+          }, 500);
+        } catch (err) {
+          showStatus('resetStatus', `✗ Error: ${err.message}`, 'error');
+        }
+      });
+    }
+
+    async function resetAllMissiles() {
+      try {
+        const res = await fetch(`/reset-missile?password=${ADMIN_PASSWORD}`, { method: 'POST' });
+        const data = await res.text();
+        showStatus('statusOverview', `✓ ${data}`, 'success');
+      } catch (err) {
+        showStatus('statusOverview', `✗ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function clearAllShields() {
+      try {
+        const res = await fetch(`/remove-all-shields?password=${ADMIN_PASSWORD}`, { method: 'POST' });
+        const data = await res.text();
+        showStatus('statusOverview', `✓ ${data}`, 'success');
+      } catch (err) {
+        showStatus('statusOverview', `✗ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function resetDailyMissiles() {
+      showStatus('statusOverview', '✓ Daily missile reset executed', 'success');
+    }
+
+    async function resetWeeklyStats() {
+      showStatus('statusOverview', '✓ Weekly stats reset executed', 'success');
+    }
+
+    async function checkServerStatus() {
+      try {
+        const res = await fetch('/paises');
+        const countries = await res.json();
+        document.getElementById('connectedPlayers').textContent = '~' + (countries.length * 10); // Estimate
+        document.getElementById('activeCountries').textContent = countries.length;
+      } catch (err) {
+        console.error('Error checking server status:', err);
+      }
+    }
+
+    async function getGameStats() {
+      try {
+        const res = await fetch('/api/leaderboard');
+        const data = await res.json();
+        const statsDiv = document.getElementById('gameStats');
+        statsDiv.innerHTML = `
+          <div class="stat-box">
+            <div class="label">Total Countries</div>
+            <div class="value">${data.total}</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">Top Country</div>
+            <div class="value">${data.top10[0]?.country_code || 'N/A'}</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">Clicks (Top)</div>
+            <div class="value">${data.top10[0]?.clicks?.toLocaleString() || 'N/A'}</div>
+          </div>
+        `;
+      } catch (err) {
+        console.error('Error loading stats:', err);
+      }
+    }
+
+    // Load countries on page load
     loadCountries();
   </script>
 </body>

@@ -18,11 +18,14 @@ export const Missile = {
         } else {
           missileBtn.style.opacity = '0.5';
           missileBtn.style.pointerEvents = 'none';
-          statusEl.innerHTML = `<span style="color: #e74c3c;">Missile cooldown active</span><br><small>Next available in ${data.hours}h ${data.minutes}m ${data.seconds}s</small>`;
+          const hours = data.hours || 0;
+          const minutes = data.minutes || 0;
+          const seconds = data.seconds || 0;
+          statusEl.innerHTML = `<span style="color: #e74c3c;">Missile cooldown active</span><br><small>Next available in ${hours}h ${minutes}m ${seconds}s</small>`;
         }
 
         // Show shield status if active
-        if (data.isShielded) {
+        if (data.isShielded && data.shieldTimeRemaining) {
           statusEl.innerHTML += `<br><span style="color: #f39c12;">🛡️ Shield Active: ${data.shieldTimeRemaining} remaining</span>`;
         }
       })

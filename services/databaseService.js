@@ -479,6 +479,22 @@ async function removeExpiredShields() {
   }
 }
 
+async function getShieldTimeRemaining(countryCode) {
+  try {
+    const result = await pool.query(
+      `SELECT shield_expires as expires_at FROM country_shields 
+       WHERE country_code = $1 
+       AND shield_active = true 
+       AND shield_expires > CURRENT_TIMESTAMP`,
+      [countryCode]
+    );
+    return result.rows.length > 0 ? result.rows[0] : null;
+  } catch (error) {
+    console.error(`Error getting shield time for ${countryCode}:`, error);
+    return null;
+  }
+}
+
 // ==================== SEASONAL RESET FUNCTIONS ====================
 
 async function archiveSeasonStats() {
@@ -592,6 +608,7 @@ module.exports = {
   grantShield,
   isShielded,
   removeExpiredShields,
+  getShieldTimeRemaining,
   // Seasonal Resets
   archiveSeasonStats,
   resetWeeklyChallenges,

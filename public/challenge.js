@@ -32,6 +32,16 @@ socket.onmessage = (event) => {
         const challengeData = data.data;
         console.log('Challenge starting:', challengeData);
         
+        // Check if current player is part of this challenge
+        const isParticipant = 
+            currentCountry === challengeData.challenger_country || 
+            currentCountry === challengeData.challenged_country;
+        
+        if (!isParticipant) {
+            console.log('Not a participant in this challenge, ignoring');
+            return;
+        }
+        
         // Show notification
         const notification = document.createElement('div');
         notification.className = 'challenge-notification animate__animated animate__bounceIn';

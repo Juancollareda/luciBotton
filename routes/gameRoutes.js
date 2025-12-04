@@ -215,13 +215,33 @@ router.get('/missile/info', async (req, res) => {
     const isShielded = await databaseService.isShielded(countryCode);
 
     let cooldownInfo = null;
+    let shieldTimeRemaining = null;
     if (!canLaunch && lastMissile) {
       const timeSinceLaunch = Date.now() - new Date(lastMissile).getTime();
       const remainingMs = MISSILE_COOLDOWN_MS - timeSinceLaunch;
+      const totalSeconds = Math.ceil(remainingMs / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      
       cooldownInfo = {
         remainingMs: remainingMs,
+        hours: hours,
+        minutes: minutes,
+        seconds: seconds,
         remainingMinutes: Math.ceil(remainingMs / 60000)
       };
+    }
+
+    if (isShielded) {
+      const shieldData = await databaseService.getShieldTimeRemaining(countryCode);
+      if (shieldData) {
+        const shieldMs = new Date(shieldData.expires_at).getTime() - Date.now();
+        const shieldSeconds = Math.ceil(shieldMs / 1000);
+        const shieldHours = Math.floor(shieldSeconds / 3600);
+        const shieldMins = Math.floor((shieldSeconds % 3600) / 60);
+        shieldTimeRemaining = `${shieldHours}h ${shieldMins}m`;
+      }
     }
 
     res.json({
@@ -229,9 +249,12 @@ router.get('/missile/info', async (req, res) => {
       canLaunch: canLaunch,
       cost: MISSILE_COST,
       maxDamagePercent: MAX_DAMAGE_PERCENT * 100,
-      cooldown: cooldownInfo,
+      hours: cooldownInfo?.hours || 0,
+      minutes: cooldownInfo?.minutes || 0,
+      seconds: cooldownInfo?.seconds || 0,
       currentClicks: clicks?.clicks || 0,
       isShielded: isShielded,
+      shieldTimeRemaining: shieldTimeRemaining,
       cooldownMinutes: Math.round(MISSILE_COOLDOWN_MS / 60000)
     });
   } catch (error) {
@@ -401,6 +424,44 @@ router.post('/season/archive', async (req, res) => {
   } catch (error) {
     console.error('Error archiving season stats:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Full game reset (deletes all data with proper foreign key cleanup)
+ * POST /api/admin/full-reset?password=...
+ */
+router.post('/admin/full-reset', async (req, res) => {
+  try {
+    const password = req.query.password;
+    const ADMIN_PASSWORD = "supersecret123123ret123123";
+
+    // Verify admin password
+    if (password !== ADMIN_PASSWORD) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    // Delete in correct order to respect foreign keys
+    // 1. Delete all challenges first (they reference countries)
+    await databaseService.pool.query('DELETE FROM country_challenges;');
+    
+    // 2. Delete all shields
+    await databaseService.pool.query('DELETE FROM country_shields;');
+    
+    // 3. Delete all stats
+    await databaseService.pool.query('DELETE FROM country_stats;');
+    
+    // 4. Delete all country clicks (the main table)
+    await databaseService.pool.query('DELETE FROM country_clicks;');
+    
+    // 5. Reset the global counter
+    await databaseService.pool.query('UPDATE counter SET count = 0;');
+
+    console.log('✓ Full game reset completed');
+    res.json({ message: '✓ Game fully reset! All countries and data deleted.' });
+  } catch (error) {
+    console.error('Error performing full reset:', error);
+    res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 });
 
