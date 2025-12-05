@@ -465,4 +465,188 @@ router.post('/admin/full-reset', async (req, res) => {
   }
 });
 
+// ==================== SHOP ROUTES ====================
+
+/**
+ * Get shop items list
+ * GET /api/shop/items
+ */
+router.get('/shop/items', (req, res) => {
+  const shopItems = [
+    {
+      id: 'click_boost_100',
+      name: '+100 Clicks',
+      icon: '⚡',
+      description: 'Get 100 instant clicks',
+      price: 50,
+      effect: 'add_clicks',
+      value: 100
+    },
+    {
+      id: 'click_boost_500',
+      name: '+500 Clicks',
+      icon: '⚡⚡',
+      description: 'Get 500 instant clicks',
+      price: 200,
+      effect: 'add_clicks',
+      value: 500
+    },
+    {
+      id: 'shield_1hr',
+      name: '1-Hour Shield',
+      icon: '🛡️',
+      description: 'Protection from missiles for 1 hour',
+      price: 150,
+      effect: 'shield',
+      value: 60
+    },
+    {
+      id: 'shield_2hr',
+      name: '2-Hour Shield',
+      icon: '🛡️🛡️',
+      description: 'Protection from missiles for 2 hours',
+      price: 250,
+      effect: 'shield',
+      value: 120
+    },
+    {
+      id: 'missile_reset',
+      name: 'Missile Reset',
+      icon: '🚀',
+      description: 'Instantly reset missile cooldown',
+      price: 100,
+      effect: 'reset_missile',
+      value: 1
+    },
+    {
+      id: '2x_multiplier',
+      name: '2x Click Multiplier',
+      icon: '2️⃣',
+      description: 'Double your clicks for 60 seconds',
+      price: 300,
+      effect: 'multiplier',
+      value: 2
+    }
+  ];
+  res.json(shopItems);
+});
+
+/**
+ * Buy shop item
+ * POST /api/shop/buy
+ */
+router.post('/shop/buy', async (req, res) => {
+  try {
+    const ip = getIP(req);
+    const geo = geoip.lookup(ip);
+    const countryCode = geo ? geo.country : 'XX';
+    const { itemId } = req.body;
+
+    if (!itemId) {
+      return res.status(400).json({ error: 'Item ID required' });
+    }
+
+    // Get shop item definition
+    const shopItems = [
+      { id: 'click_boost_100', price: 50, effect: 'add_clicks', value: 100 },
+      { id: 'click_boost_500', price: 200, effect: 'add_clicks', value: 500 },
+      { id: 'shield_1hr', price: 150, effect: 'shield', value: 60 },
+      { id: 'shield_2hr', price: 250, effect: 'shield', value: 120 },
+      { id: 'missile_reset', price: 100, effect: 'reset_missile', value: 1 },
+      { id: '2x_multiplier', price: 300, effect: 'multiplier', value: 2 }
+    ];
+
+    const item = shopItems.find(i => i.id === itemId);
+    if (!item) {
+      return res.status(404).json({ error: 'Item not found' });
+    }
+
+    // Check if country has enough clicks
+    const countryData = await databaseService.getCountryClicks(countryCode);
+    if (!countryData || countryData.clicks < item.price) {
+      return res.status(400).json({ 
+        error: 'Not enough clicks', 
+        needed: item.price, 
+        have: countryData?.clicks || 0 
+      });
+    }
+
+    // Deduct cost
+    await databaseService.updateCountryClicks(countryCode, -item.price);
+
+    // Apply effect
+    let result = { itemId, effect: item.effect, value: item.value };
+
+    if (item.effect === 'add_clicks') {
+      await databaseService.updateCountryClicks(countryCode, item.value);
+      result.message = `Got ${item.value} clicks!`;
+    } else if (item.effect === 'shield') {
+      await databaseService.grantShield(countryCode, item.value);
+      result.message = `Shield activated for ${item.value} minutes!`;
+    } else if (item.effect === 'reset_missile') {
+      // Clear missile cooldown by deleting missile_cooldown shield
+      await databaseService.pool.query(
+        'DELETE FROM country_shields WHERE country_code = $1 AND type = $2',
+        [countryCode, 'missile_cooldown']
+      );
+      result.message = 'Missile cooldown reset!';
+    } else if (item.effect === 'multiplier') {
+      // Multiplier effect would be handled on frontend with timer
+      result.message = '2x multiplier activated for 60 seconds!';
+    }
+
+    res.json({ success: true, ...result, country: countryCode });
+  } catch (error) {
+    console.error('Error buying item:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Grant shield to country
+ * POST /api/shield/grant
+ */
+router.post('/shield/grant', async (req, res) => {
+  try {
+    const ip = getIP(req);
+    const geo = geoip.lookup(ip);
+    const countryCode = geo ? geo.country : 'XX';
+    const { durationMinutes } = req.body;
+
+    if (!durationMinutes || durationMinutes < 1) {
+      return res.status(400).json({ error: 'Invalid duration' });
+    }
+
+    await databaseService.grantShield(countryCode, durationMinutes);
+    res.json({ message: `Shield granted for ${durationMinutes} minutes`, country: countryCode });
+  } catch (error) {
+    console.error('Error granting shield:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Reset missile cooldown
+ * POST /api/missile/reset
+ */
+router.post('/missile/reset', async (req, res) => {
+  try {
+    const ip = getIP(req);
+    const geo = geoip.lookup(ip);
+    const countryCode = geo ? geo.country : 'XX';
+
+    // Clear the missile cooldown for this country
+    await databaseService.pool.query(
+      'DELETE FROM country_shields WHERE country_code = $1 AND type = $2',
+      [countryCode, 'missile_cooldown']
+    );
+
+    res.json({ message: 'Missile cooldown reset', country: countryCode });
+  } catch (error) {
+    console.error('Error resetting missile cooldown:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 module.exports = router;

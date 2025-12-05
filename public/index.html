@@ -100,12 +100,96 @@
       z-index: 9999;
       animation: bounceIn 0.5s;
     }
+
+    /* Shop Styles */
+    .shop-content {
+      min-width: 600px;
+      max-width: 800px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .shop-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      padding: 20px 0;
+    }
+
+    .shop-item {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: 2px solid #ff9900;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      color: white;
+    }
+
+    .shop-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(255, 153, 0, 0.5);
+    }
+
+    .shop-item-icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+
+    .shop-item-name {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    .shop-item-description {
+      font-size: 12px;
+      color: #ddd;
+      margin-bottom: 10px;
+      min-height: 30px;
+    }
+
+    .shop-item-price {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 8px;
+      border-radius: 5px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #ffdd00;
+      margin-bottom: 10px;
+    }
+
+    .shop-item-button {
+      background: #2ecc71;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      transition: background 0.3s;
+    }
+
+    .shop-item-button:hover {
+      background: #27ae60;
+    }
+
+    .shop-item-button:disabled {
+      background: #999;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
   </style>
 </head>
 <!-- Fixed bottom nav -->
 <nav class="bottom-nav">
   <button id="navMissileButton">
     <img src="bunbat missil.png" alt="Missile Icon" style="height: 100px; vertical-align:middle;">
+  </button>
+  <button id="navShopButton">
+    <img src="bunbat shop.png" alt="Shop Icon" style="height: 100px; vertical-align:middle;">
   </button>
   <button id="navHelpButton">
     <img src="bunbat help.png" alt="Help Icon" style="height: 100px; vertical-align:middle;">
@@ -148,6 +232,16 @@
   </div>
 </div>
 
+<!-- Shop Modal -->
+<div id="shopModal" class="modal">
+  <div class="modal-content shop-content">
+    <span class="close-btn" id="closeShop">&times;</span>
+    <h2 style="text-align: center; color: #ff9900; margin-bottom: 20px;">🛍️ Shop - Buy Power-ups</h2>
+    <div id="shopItems" class="shop-items"></div>
+    <div id="shopStatus" style="text-align: center; margin-top: 15px; font-size: 14px; color: #ffdd00;"></div>
+  </div>
+</div>
+
 <!-- Modal for missile input -->
 <div id="missileModal" class="modal">
   <div class="modal-content">
@@ -168,6 +262,17 @@
         <li>Click the Luci gif to contribute to the global counter</li>
         <li>Watch for the golden bunbat to appear for bonus points!</li>
         <li>Your country's total is shown in the rankings</li>
+        <li>Earn tier badges based on your click count: Bronze → Silver → Gold → Legendary</li>
+      </ul>
+    </div>
+
+    <div class="help-section">
+      <h3>🏆 Tier System</h3>
+      <ul>
+        <li><strong>🥉 Bronze:</strong> Less than 1,000 clicks</li>
+        <li><strong>🥈 Silver:</strong> 1,000 - 9,999 clicks</li>
+        <li><strong>🥇 Gold:</strong> 10,000 - 99,999 clicks</li>
+        <li><strong>👑 Legendary:</strong> 100,000+ clicks</li>
       </ul>
     </div>
 
@@ -212,12 +317,26 @@
     </div>
 
     <div class="help-section">
+      <h3>🛍️ Shop - Power-ups</h3>
+      <p>Click the Shop button to buy consumable power-ups:</p>
+      <ul>
+        <li><strong>⚡ Click Boosts:</strong> Buy +100 or +500 instant clicks</li>
+        <li><strong>🛡️ Shield:</strong> Protect yourself from missiles for 1-2 hours</li>
+        <li><strong>🚀 Missile Reset:</strong> Instantly reset your missile cooldown</li>
+        <li><strong>2️⃣ Click Multiplier:</strong> Double your clicks for 60 seconds</li>
+      </ul>
+      <p class="help-note">💰 All items are purchased with your clicks</p>
+    </div>
+
+    <div class="help-section">
       <h3>💡 Pro Tips</h3>
       <ul>
         <li>Time your missile attacks when target countries have high click counts</li>
         <li>Challenge countries with similar click counts for fair duels</li>
         <li>Keep an eye on the rankings to spot potential targets</li>
         <li>Golden bunbats appear randomly - don't miss them!</li>
+        <li>Use shop power-ups strategically to gain advantages in battles</li>
+        <li>Shields are useful before expected missile attacks!</li>
       </ul>
     </div>
   </div>
@@ -253,13 +372,6 @@
     </ul>
   </div>
 
-  <!-- Stats Panel -->
-  <div class="stats-panel">
-    <div id="topFlag" style="margin-bottom: 10px;"></div>
-    <div id="response" style="font-size: 2rem; margin-bottom: 5px;"></div>
-    <div id="response2" style="font-size: 1rem; color: #ffdd00;"></div>
-  </div>
-
   <div class="left">
     <div class="title-container">
       <h1 class="game-title animate__animated animate__bounceIn">Global wololo Counter</h1>
@@ -274,6 +386,13 @@
       />
     </button>
     <img id="apple" src="bunbat golden.png" alt="Golden Bunbat" title="Click the golden bunbat for bonus points!">
+
+    <!-- Stats Panel -->
+    <div class="stats-panel">
+      <div id="topFlag" style="margin-bottom: 10px;"></div>
+      <div id="response" style="font-size: 2rem; margin-bottom: 5px;"></div>
+      <div id="response2" style="font-size: 1rem; color: #ffdd00;"></div>
+    </div>
     <!--Click button (make it droppable) 
 <div id="clickButtonDrop" ondrop="dropAutoclicker(event)" ondragover="allowDrop(event)">
   <button class="gif-button" id="mainClickButton" onclick="clickButton()">
@@ -342,5 +461,154 @@
 
   <script src="challenge.js"></script>
   <script type="module" src="main.js" defer></script>
+  <script>
+// --- Auto-refresh ranking table every 5 seconds ---
+function loadRanking() {
+  fetch('/api/leaderboard')
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.getElementById('rankingBody');
+      tbody.innerHTML = '';
+      data.top10.forEach((row, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${row.tier?.icon || ''} ${row.tier?.name || ''}</td>
+          <td>${row.country_code}</td>
+          <td>${row.clicks.toLocaleString()}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    });
+}
+
+// Initial load
+loadRanking();
+// Poll every 5 seconds
+setInterval(loadRanking, 1000);
+
+// ==================== SHOP SYSTEM ====================
+const SHOP_ITEMS = [
+  {
+    id: 'click_boost_100',
+    name: '+100 Clicks',
+    icon: '⚡',
+    description: 'Get 100 instant clicks',
+    price: 50,
+    effect: 'add_clicks',
+    value: 100
+  },
+  {
+    id: 'click_boost_500',
+    name: '+500 Clicks',
+    icon: '⚡⚡',
+    description: 'Get 500 instant clicks',
+    price: 200,
+    effect: 'add_clicks',
+    value: 500
+  },
+  {
+    id: 'shield_1hr',
+    name: '1-Hour Shield',
+    icon: '🛡️',
+    description: 'Protection from missiles for 1 hour',
+    price: 150,
+    effect: 'shield',
+    value: 60
+  },
+  {
+    id: 'shield_2hr',
+    name: '2-Hour Shield',
+    icon: '🛡️🛡️',
+    description: 'Protection from missiles for 2 hours',
+    price: 250,
+    effect: 'shield',
+    value: 120
+  },
+  {
+    id: 'missile_reset',
+    name: 'Missile Reset',
+    icon: '🚀',
+    description: 'Instantly reset missile cooldown',
+    price: 100,
+    effect: 'reset_missile',
+    value: 1
+  },
+  {
+    id: '2x_multiplier',
+    name: '2x Click Multiplier',
+    icon: '2️⃣',
+    description: 'Double your clicks for 60 seconds',
+    price: 300,
+    effect: 'multiplier',
+    value: 2
+  }
+];
+
+function loadShop() {
+  const shopItemsDiv = document.getElementById('shopItems');
+  shopItemsDiv.innerHTML = '';
+  
+  fetch('/api/stats/my-country')
+    .then(res => res.json())
+    .then(country => {
+      SHOP_ITEMS.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'shop-item';
+        const hasEnough = country.clicks >= item.price;
+        
+        itemDiv.innerHTML = `
+          <div class="shop-item-icon">${item.icon}</div>
+          <div class="shop-item-name">${item.name}</div>
+          <div class="shop-item-description">${item.description}</div>
+          <div class="shop-item-price">💰 ${item.price} clicks</div>
+          <button class="shop-item-button" 
+                  onclick="buyItem('${item.id}', ${item.price})"
+                  ${hasEnough ? '' : 'disabled'}>
+            ${hasEnough ? 'BUY' : 'NEED ' + (item.price - country.clicks) + ' MORE'}
+          </button>
+        `;
+        shopItemsDiv.appendChild(itemDiv);
+      });
+    });
+}
+
+async function buyItem(itemId, price) {
+  const item = SHOP_ITEMS.find(i => i.id === itemId);
+  if (!item) return;
+  
+  try {
+    const res = await fetch('/api/shop/buy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ itemId })
+    });
+
+    const data = await res.json();
+    
+    if (!res.ok) {
+      alert(`❌ ${data.error}`);
+      loadShop();
+      return;
+    }
+
+    // Show success message
+    alert(`✅ ${data.message}`);
+
+    // Reload shop and ranking
+    document.getElementById('shopStatus').innerHTML = `<span style="color: #2ecc71;">✅ Purchase successful!</span>`;
+    setTimeout(() => {
+      loadShop();
+      loadRanking();
+      document.getElementById('shopStatus').innerHTML = '';
+    }, 2000);
+
+  } catch (error) {
+    console.error('Error buying item:', error);
+    alert('❌ Purchase failed!');
+    loadShop();
+  }
+}
+</script>
 </body>
 </html>

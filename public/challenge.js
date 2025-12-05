@@ -20,7 +20,14 @@ fetch('/api/current-country')
 
 // Listen for challenge updates
 socket.onmessage = (event) => {
-    const data = JSON.parse(event.data);
+    let data;
+    try {
+        data = JSON.parse(event.data);
+    } catch (e) {
+        // Not valid JSON, ignore this message
+        console.debug('Received non-JSON WebSocket message:', event.data);
+        return;
+    }
     
     if (data.type === 'newChallenge') {
         // Refresh challenges list when a new one is created

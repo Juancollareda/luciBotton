@@ -15,7 +15,14 @@ export const Ranking = {
       this.ws = new WebSocket(`${protocol}//${window.location.host}`);
       
       this.ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
+        let data;
+        try {
+          data = JSON.parse(event.data);
+        } catch (e) {
+          // Not valid JSON, ignore this message
+          console.debug('Received non-JSON WebSocket message:', event.data);
+          return;
+        }
         if (data.type === 'rankingUpdate') {
           this.updateTable(data.payload);
         }

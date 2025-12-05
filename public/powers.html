@@ -691,8 +691,12 @@
       // Load content based on tab
       if (tabName === 'countries') {
         loadCountries();
+          startCountryPolling();
       } else if (tabName === 'overview') {
         checkServerStatus();
+          stopCountryPolling();
+        } else {
+          stopCountryPolling();
       }
     }
 
@@ -938,6 +942,25 @@
         console.error('Error loading countries:', err);
       }
     }
+
+      // ==================== COUNTRY POLLING ====================
+      let countryPollingInterval = null;
+      function startCountryPolling() {
+        if (countryPollingInterval) return;
+        countryPollingInterval = setInterval(() => {
+          // Only poll if Countries tab is active
+          if (document.getElementById('countries').classList.contains('active')) {
+            loadCountries();
+          }
+        }, 5000);
+      }
+
+      function stopCountryPolling() {
+        if (countryPollingInterval) {
+          clearInterval(countryPollingInterval);
+          countryPollingInterval = null;
+        }
+      }
 
     function getTierInfo(clicks) {
       if (clicks < 1000) return { name: 'Bronze', icon: '🥉', color: '#CD7F32' };
