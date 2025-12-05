@@ -428,15 +428,27 @@ async function getRankingWithTiers() {
 async function grantShield(countryCode, durationMinutes = 120) {
   try {
     const expiresAt = new Date(Date.now() + durationMinutes * 60000);
-    const result = await pool.query(
-      `INSERT INTO country_shields (country_code, shield_active, shield_expires)
-       VALUES ($1, true, $2)
-       ON CONFLICT (country_code) 
-       DO UPDATE SET shield_active = true, shield_expires = $2
+    // First try to update
+    const updateResult = await pool.query(
+      `UPDATE country_shields 
+       SET shield_active = true, shield_expires = $1 
+       WHERE country_code = $2
        RETURNING *;`,
-      [countryCode, expiresAt]
+      [expiresAt, countryCode]
     );
-    return result.rows[0];
+    
+    // If no rows were updated, insert
+    if (updateResult.rows.length === 0) {
+      const insertResult = await pool.query(
+        `INSERT INTO country_shields (country_code, shield_active, shield_expires)
+         VALUES ($1, true, $2)
+         RETURNING *;`,
+        [countryCode, expiresAt]
+      );
+      return insertResult.rows[0];
+    }
+    
+    return updateResult.rows[0];
   } catch (error) {
     console.error(`Error granting shield to ${countryCode}:`, error);
     throw error;

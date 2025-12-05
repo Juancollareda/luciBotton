@@ -111,8 +111,8 @@ router.post('/missile/launch', async (req, res) => {
     const ip = getIP(req);
     const geo = geoip.lookup(ip);
     const attackerCountry = geo ? geo.country : 'XX';
-    const targetCountry = req.query.target ? req.query.target.toUpperCase() : null;
-    const requestedDamage = Math.max(MISSILE_COST, parseInt(req.query.amount) || MISSILE_COST);
+    const targetCountry = req.body.targetCountry ? req.body.targetCountry.toUpperCase() : null;
+    const requestedDamage = Math.max(MISSILE_COST, parseInt(req.body.damage) || MISSILE_COST);
 
     // Validation
     if (!targetCountry) return res.status(400).json({ error: 'Missing target country' });
@@ -584,10 +584,10 @@ router.post('/shop/buy', async (req, res) => {
       await databaseService.grantShield(countryCode, item.value);
       result.message = `Shield activated for ${item.value} minutes!`;
     } else if (item.effect === 'reset_missile') {
-      // Clear missile cooldown by deleting missile_cooldown shield
+      // Clear missile cooldown by deleting the last missile time
       await databaseService.pool.query(
-        'DELETE FROM country_shields WHERE country_code = $1 AND type = $2',
-        [countryCode, 'missile_cooldown']
+        'DELETE FROM country_missiles WHERE country_code = $1',
+        [countryCode]
       );
       result.message = 'Missile cooldown reset!';
     } else if (item.effect === 'multiplier') {
