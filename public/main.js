@@ -7,6 +7,22 @@ import { Golden } from './golden.js';
 
 window.Missile = Missile; // para que modals.js pueda llamar a startFrenzy
 
+// Global alert modal function
+window.showAlert = function(message, title = 'Alert') {
+  const alertModal = document.getElementById('alertModal');
+  const alertTitle = document.getElementById('alertTitle');
+  const alertMessage = document.getElementById('alertMessage');
+  const alertButton = document.getElementById('alertButton');
+  
+  alertTitle.textContent = title;
+  alertMessage.textContent = message;
+  alertModal.style.display = 'flex';
+  
+  alertButton.onclick = () => {
+    alertModal.style.display = 'none';
+  };
+};
+
 window.onload = () => {
   // Initialize modules
   Ranking.init();  // This sets up WebSocket connection

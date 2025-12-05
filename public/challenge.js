@@ -123,7 +123,7 @@ createChallengeBtn.addEventListener('click', async () => {
     const betAmount = parseInt(document.getElementById('betAmount').value);
 
     if (!countryCode || !betAmount) {
-        alert('Please fill in all fields');
+        showAlert('Please fill in all fields', '⚠️ Error');
         return;
     }
 
@@ -140,7 +140,7 @@ createChallengeBtn.addEventListener('click', async () => {
 
         // Check if challenger has enough clicks
         if (myData.clicks < betAmount) {
-            alert(`❌ Not enough clicks! You have ${myData.clicks}, but need ${betAmount}`);
+            showAlert(`❌ Not enough clicks! You have ${myData.clicks}, but need ${betAmount}`, '⚠️ Insufficient Clicks');
             return;
         }
 
@@ -169,16 +169,16 @@ createChallengeBtn.addEventListener('click', async () => {
 
         const data = await response.json();
         if (response.ok) {
-            alert('✓ Challenge created successfully!');
+            showAlert('✓ Challenge created successfully!', '✅ Success');
             document.getElementById('challengeCountry').value = '';
             document.getElementById('betAmount').value = '';
             refreshChallenges();
         } else {
-            alert(data.error || 'Failed to create challenge');
+            showAlert(data.error || 'Failed to create challenge', '❌ Error');
         }
     } catch (error) {
         console.error('Error creating challenge:', error);
-        alert('Failed to create challenge');
+        showAlert('Failed to create challenge', '❌ Error');
     }
 });
 
@@ -300,15 +300,15 @@ window.acceptChallenge = async function(challengeId) {
         const data = await response.json();
         
         if (response.ok) {
-            alert('Challenge accepted! Get ready to click!');
+            showAlert('Challenge accepted! Get ready to click!', '⚔️ Challenge Accepted');
             // The WebSocket will trigger the competition for both parties
             refreshChallenges();
         } else {
-            alert(data.error || 'Failed to accept challenge');
+            showAlert(data.error || 'Failed to accept challenge', '❌ Error');
         }
     } catch (error) {
         console.error('Error accepting challenge:', error);
-        alert('Failed to accept challenge');
+        showAlert('Failed to accept challenge', '❌ Error');
     }
 }
 

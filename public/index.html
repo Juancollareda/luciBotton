@@ -349,6 +349,16 @@
     <p id="cooldownMessage">This country is still on cooldown.</p>
   </div>
 </div>
+
+<!-- Alert Modal -->
+<div id="alertModal" class="modal">
+  <div class="modal-content" style="max-width: 400px;">
+    <h2 id="alertTitle">Alert</h2>
+    <p id="alertMessage"></p>
+    <button id="alertButton" style="margin-top: 20px; width: 100%;">OK</button>
+  </div>
+</div>
+
 <body>
   <!-- Game Features Tooltip -->
   <div class="feature-tooltip">
@@ -588,13 +598,13 @@ async function buyItem(itemId, price) {
     const data = await res.json();
     
     if (!res.ok) {
-      alert(`❌ ${data.error}`);
+      showAlert(`${data.error}`, '❌ Purchase Failed');
       loadShop();
       return;
     }
 
     // Show success message
-    alert(`✅ ${data.message}`);
+    showAlert(`${data.message}`, '✅ Purchase Successful');
 
     // Reload shop and ranking
     document.getElementById('shopStatus').innerHTML = `<span style="color: #2ecc71;">✅ Purchase successful!</span>`;
