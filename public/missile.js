@@ -37,12 +37,11 @@ export const Missile = {
     const resultEl = document.getElementById('frenzyMissileResult');
 
     // Get current player's click count
-    fetch('/paises')
+    fetch('/api/stats/my-country')
       .then(res => res.json())
       .then(data => {
-        // Find current country from the data
-        const myCountry = data.find(c => c.country_code === localStorage.getItem('country'));
-        const myClicks = myCountry ? myCountry.clicks : 0;
+        const myClicks = data.clicks || 0;
+        const myCountry = data.country;
 
         if (myClicks < Missile.MISSILE_COST) {
           resultEl.innerHTML = `<span style="color: #e74c3c;">❌ Not enough clicks! Need ${Missile.MISSILE_COST} clicks, you have ${myClicks}</span>`;
