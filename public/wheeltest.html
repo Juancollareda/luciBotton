@@ -2,88 +2,170 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Cyber Music Wheel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Cyber Music Wheel & Turntable</title>
   <style>
     :root {
       --main-color: #e50914;
       --bg-color: #0b0b0b;
       --text-color: #fff;
       --inactive-color: #555;
+      --purple-color: #a855f7;
+      --cyber-glow: 0 0 15px var(--main-color);
     }
 
     body {
       margin: 0;
-      background: var(--bg-color);
-      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at center, #180506 0%, var(--bg-color) 100%);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
       overflow: hidden;
+      color: var(--text-color);
+      min-height: 100vh;
+      position: relative;
     }
 
-.wheel-wrapper {
-  position: fixed;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%); /* Stick to left side vertically centered */
-  width: 350px;
-  height: 700px;
-  overflow: hidden;
-  clip-path: inset(0 0 0 50%);
-}
+    .app-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
 
-   .wheel {
-  position: absolute;
-  top: 0;
-  left: -350px; /* shift the circle so the right half is visible */
-  width: 700px;
-  height: 700px;
-  border-radius: 50%;
-  transition: transform 0.1s ease-out;
-  cursor: grab;
-}
+    /* Turntable Section */
+    .turntable-container {
+      position: relative;
+      width: 350px;
+      height: 700px;
+      flex-shrink: 0;
+    }
 
+    .wheel-wrapper {
+      position: fixed;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      width: 350px;
+      height: 700px;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .wheel {
+      position: absolute;
+      top: 0;
+      left: -350px;
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      cursor: grab;
+      transition: transform 0.1s ease-out;
+      background: #050505;
+      box-shadow: 0 0 50px rgba(0,0,0,0.9);
+    }
+
+    /* Vinyl Surface styling */
+    .vinyl-plate {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: 
+        conic-gradient(from 0deg, rgba(255,255,255,0.06) 0deg, transparent 45deg, rgba(255,255,255,0.06) 90deg, transparent 135deg, rgba(255,255,255,0.06) 180deg, transparent 225deg, rgba(255,255,255,0.06) 270deg, transparent 315deg, rgba(255,255,255,0.06) 360deg),
+        repeating-radial-gradient(circle, #222, #0b0b0b 2px, #1a1a1a 4px);
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.95);
+      pointer-events: none;
+    }
+
+    @keyframes spin-vinyl {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .vinyl-plate.spinning {
+      animation: spin-vinyl 10s linear infinite;
+    }
+
+    /* Vinyl center sticker */
+    .vinyl-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--main-color) 0%, #a855f7 100%);
+      border: 5px solid #111;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 0 10px rgba(229, 9, 20, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .vinyl-spindle {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--bg-color);
+      border: 2px solid rgba(255,255,255,0.4);
+    }
+
+    /* Items / Tracks on the wheel */
     .item {
       position: absolute;
       top: 50%;
       left: 50%;
       transform-origin: center center;
-      /* Rotate to position, then counter-rotate to keep text upright */
-      transform: rotate(calc(var(--angle) * 1deg)) translate(0, -300px) rotate(calc(var(--angle) * -1deg));
-      text-align: center;
-      font-size: 14px;
-      width: 100px;
-      margin-left: -50px;
+      font-size: 13px;
+      width: 170px;
+      margin-left: -85px;
       color: var(--inactive-color);
       transition: all 0.2s ease-in-out;
-      opacity: 0.6;
+      opacity: 0.65;
+      pointer-events: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      z-index: 2;
     }
 
     .item.active {
       color: var(--main-color);
       font-weight: bold;
-      font-size: 16px;
+      font-size: 15px;
       opacity: 1;
-      text-shadow: 0 0 8px var(--main-color);
+      text-shadow: var(--cyber-glow);
     }
 
-    #player-container {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      right: auto;
-      transform: translate(-50%, -50%); /* Center horizontally and vertically */
-      z-index: 10;
-      width: 560px;
-      height: 315px;
-      background-color: #000;
-      box-shadow: 0 0 20px #e50914;
-      border: 2px solid var(--main-color);
+    /* Tonearm Needle */
+    .tonearm {
+      position: absolute;
+      top: 40px;
+      right: 0px;
+      width: 120px;
+      height: 350px;
+      transform-origin: 80px 40px;
+      transform: rotate(-16deg);
+      transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+      pointer-events: none;
+      z-index: 12;
     }
 
-    #youtube-player {
-      width: 100%;
-      height: 100%;
-      border: none;
+    .tonearm.playing {
+      transform: rotate(11deg);
     }
 
+    .laser-needle {
+      animation: pulse-laser 0.8s infinite alternate;
+    }
+
+    @keyframes pulse-laser {
+      from { r: 1.5px; fill: #ff3333; filter: drop-shadow(0 0 1px #ff0000); }
+      to { r: 3px; fill: #ff9999; filter: drop-shadow(0 0 6px #ff0000); }
+    }
+
+    /* Selector pointer */
     .selector-line {
       position: absolute;
       top: 50%;
@@ -95,43 +177,375 @@
       z-index: 100;
       pointer-events: none;
     }
-    .selector-line.highlight {
-      /* Remove color from container, apply to arrow only */
-      /* No effect here, handled below */
-    }
+
     #arrow {
-      font-size: 32px;
+      font-size: 28px;
       color: var(--inactive-color);
       transition: color 0.2s, text-shadow 0.2s;
     }
+
     .selector-line.highlight #arrow {
       color: var(--main-color);
-      text-shadow: 0 0 10px var(--main-color);
+      text-shadow: var(--cyber-glow);
+    }
+
+    #selected-title {
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .selector-line.highlight #selected-title {
+      opacity: 1;
+    }
+
+    /* Player Deck Section */
+    .player-deck {
+      position: fixed;
+      top: 50%;
+      background: rgba(12, 12, 12, 0.78);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(229, 9, 20, 0.28);
+      border-radius: 16px;
+      padding: 24px;
+      width: 480px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(229, 9, 20, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-sizing: border-box;
+      z-index: 5;
+    }
+
+    #player-container {
+      width: 100%;
+      height: 243px;
+      background-color: #000;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #youtube-player-placeholder {
+      width: 100%;
+      height: 100%;
+    }
+
+    .track-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      padding-bottom: 14px;
+    }
+
+    .title-marquee {
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 19px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+
+    #active-track-name {
+      display: inline-block;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.25);
+    }
+
+    #active-track-status {
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--main-color);
+      letter-spacing: 2px;
+      text-shadow: var(--cyber-glow);
+    }
+
+    /* Waveform visualizer */
+    .visualizer-container {
+      width: 100%;
+      height: 60px;
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    #visualizer {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .timeline-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .time-display {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #888;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    /* Input ranges */
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+    }
+
+    input[type="range"]:focus {
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 4px;
+      cursor: pointer;
+      background: #252525;
+      border-radius: 2px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      height: 12px;
+      width: 12px;
+      border-radius: 50%;
+      background: var(--main-color);
+      box-shadow: var(--cyber-glow);
+      cursor: pointer;
+      -webkit-appearance: none;
+      margin-top: -4px;
+      transition: transform 0.1s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.3);
+    }
+
+    .controls-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .btn-control {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 18px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .btn-control:hover {
+      background: var(--main-color);
+      border-color: var(--main-color);
+      box-shadow: var(--cyber-glow);
+      transform: scale(1.08);
+    }
+
+    .btn-control.play-pause-btn {
+      width: 56px;
+      height: 56px;
+      font-size: 24px;
+      background: var(--main-color);
+      border-color: var(--main-color);
+      box-shadow: var(--cyber-glow);
+    }
+
+    .btn-control.play-pause-btn:hover {
+      transform: scale(1.1);
+      filter: brightness(1.2);
+    }
+
+    .btn-control.active {
+      color: var(--purple-color);
+      border-color: var(--purple-color);
+      box-shadow: 0 0 10px var(--purple-color);
+      background: rgba(168, 85, 247, 0.15);
+    }
+
+    .volume-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-top: 4px;
+    }
+
+    .vol-icon {
+      font-size: 14px;
+      color: #888;
+    }
+
+    /* Mobile Portrait Responsive Layout */
+    @media (max-width: 768px) {
+      body {
+        background: radial-gradient(circle at center, #1a0203 0%, var(--bg-color) 100%);
+      }
+
+      .app-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        width: 440px;
+        height: 920px;
+        gap: 20px;
+        padding: 20px 10px;
+        box-sizing: border-box;
+      }
+
+      .player-deck {
+        position: relative;
+        top: auto;
+        right: auto;
+        transform: none;
+        width: 100%;
+        max-width: 420px;
+        order: 1;
+      }
+
+      .turntable-container {
+        order: 2;
+        height: 450px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+
+      .wheel-wrapper {
+        position: relative;
+        bottom: 0;
+        top: 0;
+        left: -35px;
+        transform: scale(0.65);
+        transform-origin: left top;
+      }
     }
   </style>
 </head>
 <body>
 
-<div class="wheel-wrapper">
-  <div class="selector-line" id="selector">
-    <span id="selected-title">◀</span>
-    <span id="arrow">◀</span>
-  </div>
-  <div class="wheel" id="wheel"></div>
-</div>
+<div class="app-container">
+  <!-- Left Side: Turntable -->
+  <div class="turntable-container">
+    <div class="wheel-wrapper">
+      <div class="selector-line" id="selector">
+        <span id="selected-title">◀</span>
+        <span id="arrow">◀</span>
+      </div>
+      
+      <div class="wheel" id="wheel">
+        <div class="vinyl-plate" id="vinyl-plate">
+          <div class="vinyl-label">
+            <div class="vinyl-spindle"></div>
+          </div>
+        </div>
+      </div>
 
-<div id="player-container">
-  <iframe id="youtube-player"
-          src=""
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen>
-  </iframe>
+      <!-- Turntable Tonearm / Stylus needle -->
+      <div class="tonearm" id="tonearm">
+        <svg viewBox="0 0 120 350" style="width: 100%; height: 100%;">
+          <defs>
+            <radialGradient id="metallic-base" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#888" />
+              <stop offset="50%" stop-color="#444" />
+              <stop offset="100%" stop-color="#1b1b1b" />
+            </radialGradient>
+            <linearGradient id="metallic-weight" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#aaa" />
+              <stop offset="50%" stop-color="#555" />
+              <stop offset="100%" stop-color="#111" />
+            </linearGradient>
+            <linearGradient id="metallic-arm" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#eee" />
+              <stop offset="50%" stop-color="#888" />
+              <stop offset="100%" stop-color="#333" />
+            </linearGradient>
+          </defs>
+          
+          <!-- Base Pivot -->
+          <circle cx="80" cy="40" r="22" fill="url(#metallic-base)" stroke="#222" stroke-width="1.5"/>
+          <circle cx="80" cy="40" r="9" fill="#090909" stroke="var(--main-color)" stroke-width="1.5"/>
+          
+          <!-- Counterweight -->
+          <rect x="71" y="10" width="18" height="14" rx="2" fill="url(#metallic-weight)" stroke="#222"/>
+          
+          <!-- Curved metallic tonearm -->
+          <path d="M 80 40 Q 95 150 42 278" fill="none" stroke="url(#metallic-arm)" stroke-width="5" stroke-linecap="round"/>
+          
+          <!-- Angled cartridge needle head -->
+          <g transform="translate(42, 278) rotate(22)">
+            <rect x="-8" y="0" width="16" height="26" rx="2" fill="#181818" stroke="#333"/>
+            <polygon points="-5,26 5,26 3,33 -3,33" fill="var(--main-color)"/>
+            <!-- Pulsing red laser dot tip -->
+            <circle cx="0" cy="33" r="2" fill="#ff3333" class="laser-needle"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Side: Cyber player deck -->
+  <div class="player-deck">
+    <div id="player-container">
+      <div id="youtube-player-placeholder"></div>
+    </div>
+    
+    <div class="track-info">
+      <div class="title-marquee">
+        <div id="active-track-name">Select a Track</div>
+      </div>
+      <div id="active-track-status">PAUSED</div>
+    </div>
+
+    <!-- Canvas Visualizer -->
+    <div class="visualizer-container">
+      <canvas id="visualizer"></canvas>
+    </div>
+
+    <!-- Timeline Progress Bar -->
+    <div class="timeline-controls">
+      <div class="time-display">
+        <span id="current-time">00:00</span>
+        <span id="total-time">00:00</span>
+      </div>
+      <input type="range" id="progress-bar" min="0" max="100" value="0" step="0.1" />
+    </div>
+
+    <!-- Interactive Navigation Buttons -->
+    <div class="controls-row">
+      <button class="btn-control" id="btn-prev" title="Previous Track">⏮</button>
+      <button class="btn-control play-pause-btn" id="btn-play-pause" title="Play/Pause">▶</button>
+      <button class="btn-control" id="btn-next" title="Next Track">⏭</button>
+      <button class="btn-control" id="btn-loop" title="Toggle Loop">🔁</button>
+    </div>
+    
+    <!-- Interactive Volume bar -->
+    <div class="volume-row">
+      <span class="vol-icon">🔊</span>
+      <input type="range" id="volume-slider" min="0" max="100" value="90" />
+    </div>
+  </div>
 </div>
 
 <script>
-  const wheel = document.getElementById('wheel');
-  const selector = document.getElementById('selector');
   const songs = [
     { name: ' Identity / アイデンティティ', youtubeId: 'aJhDzTSgHUc' },
     { name: ' Stay with me / 真夜中のドア', youtubeId: 'Qim7Netvj8g' },
@@ -146,10 +560,19 @@
 
   const count = songs.length;
   const anglePerItem = 360 / count;
-  let wheelScrollTimeout;
   const selectorAngle = 90; // Center of right half-circle (90deg)
+  
+  let player;
+  let isDragging = false;
+  let currentRotation = 0;
+  let lastAngle = 0;
+  let isLooping = false;
+  let isSeeking = false;
+  let animFrame;
+  let waveOffset = 0;
 
-  // Create wheel items
+  // Initialize wheel
+  const wheel = document.getElementById('wheel');
   songs.forEach((song, i) => {
     const angle = anglePerItem * i;
     const item = document.createElement('div');
@@ -160,32 +583,189 @@
     wheel.appendChild(item);
   });
 
-  let isDragging = false;
-  let startX = 0;
-  let currentRotation = 0;
+  // Load YouTube Iframe API
+  const tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  const firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-  wheel.addEventListener('mousedown', e => {
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('youtube-player-placeholder', {
+      height: '100%',
+      width: '100%',
+      videoId: songs[0].youtubeId,
+      playerVars: {
+        'playsinline': 1,
+        'controls': 0,
+        'disablekb': 1,
+        'fs': 0,
+        'rel': 0,
+        'modestbranding': 1
+      },
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    const volumeSlider = document.getElementById('volume-slider');
+    player.setVolume(volumeSlider.value);
+    
+    highlightActiveItem(0);
+    drawVisualizer();
+  }
+
+  function onPlayerStateChange(event) {
+    const statusText = document.getElementById('active-track-status');
+    const tonearm = document.getElementById('tonearm');
+    const vinylPlate = document.getElementById('vinyl-plate');
+    const btnPlayPause = document.getElementById('btn-play-pause');
+    
+    if (event.data === YT.PlayerState.PLAYING) {
+      btnPlayPause.textContent = '⏸';
+      btnPlayPause.classList.add('playing');
+      statusText.textContent = 'PLAYING';
+      tonearm.classList.add('playing');
+      vinylPlate.classList.add('spinning');
+      
+      const activeIndex = getClosestItemIndex(currentRotation);
+      document.getElementById('active-track-name').textContent = songs[activeIndex].name;
+    } else {
+      btnPlayPause.textContent = '▶';
+      btnPlayPause.classList.remove('playing');
+      statusText.textContent = 'PAUSED';
+      tonearm.classList.remove('playing');
+      vinylPlate.classList.remove('spinning');
+    }
+    
+    if (event.data === YT.PlayerState.ENDED) {
+      if (isLooping) {
+        player.playVideo();
+      } else {
+        playNext();
+      }
+    }
+  }
+
+  // Playback Control Event Listeners
+  const btnPlayPause = document.getElementById('btn-play-pause');
+  btnPlayPause.addEventListener('click', () => {
+    if (!player) return;
+    const state = player.getPlayerState();
+    if (state === YT.PlayerState.PLAYING) {
+      player.pauseVideo();
+    } else {
+      player.playVideo();
+    }
+  });
+
+  document.getElementById('btn-next').addEventListener('click', playNext);
+  document.getElementById('btn-prev').addEventListener('click', playPrev);
+  
+  const btnLoop = document.getElementById('btn-loop');
+  btnLoop.addEventListener('click', () => {
+    isLooping = !isLooping;
+    btnLoop.classList.toggle('active', isLooping);
+  });
+
+  function playNext() {
+    const currentIndex = getClosestItemIndex(currentRotation);
+    const nextIndex = (currentIndex + 1) % songs.length;
+    selectSongByIndex(nextIndex);
+  }
+
+  function playPrev() {
+    const currentIndex = getClosestItemIndex(currentRotation);
+    const prevIndex = (currentIndex - 1 + songs.length) % songs.length;
+    selectSongByIndex(prevIndex);
+  }
+
+  function selectSongByIndex(index) {
+    currentRotation = selectorAngle - index * anglePerItem;
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+    updateItemTransforms(currentRotation);
+    
+    const selectedSong = songs[index];
+    if (player && player.loadVideoById) {
+      player.loadVideoById(selectedSong.youtubeId);
+    }
+    highlightActiveItem(index);
+    document.getElementById('active-track-name').textContent = selectedSong.name;
+  }
+
+  // Wheel drag interactions (Mouse & Touch)
+  function getAngle(clientX, clientY) {
+    const rect = wheel.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    return Math.atan2(clientY - centerY, clientX - centerX);
+  }
+
+  function dragStart(clientX, clientY) {
     isDragging = true;
-    startX = e.clientX;
+    lastAngle = getAngle(clientX, clientY);
     wheel.style.cursor = 'grabbing';
-  });
+  }
 
-  document.addEventListener('mousemove', e => {
+  function dragMove(clientX, clientY) {
     if (!isDragging) return;
-    const deltaX = e.clientX - startX;
-    const tempRotation = currentRotation + deltaX;
-    wheel.style.transform = `rotate(${tempRotation}deg)`;
-    updateItemTransforms(tempRotation);
-  });
+    const currentAngle = getAngle(clientX, clientY);
+    let angleDiff = currentAngle - lastAngle;
+    
+    angleDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
+    
+    currentRotation += angleDiff * (180 / Math.PI);
+    lastAngle = currentAngle;
+    
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+    updateItemTransforms(currentRotation);
+  }
 
-  document.addEventListener('mouseup', e => {
+  function dragEnd() {
     if (!isDragging) return;
-    const deltaX = e.clientX - startX;
-    currentRotation += deltaX;
     isDragging = false;
     wheel.style.cursor = 'grab';
     snapToClosest();
-    updateItemTransforms(currentRotation);
+  }
+
+  // Mouse Drag Events
+  wheel.addEventListener('mousedown', e => {
+    dragStart(e.clientX, e.clientY);
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (isDragging) {
+      dragMove(e.clientX, e.clientY);
+    }
+  });
+
+  document.addEventListener('mouseup', e => {
+    if (isDragging) {
+      dragEnd();
+    }
+  });
+
+  // Touch Drag Events (Mobile)
+  wheel.addEventListener('touchstart', e => {
+    if (e.touches.length > 0) {
+      e.preventDefault();
+      dragStart(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchmove', e => {
+    if (isDragging && e.touches.length > 0) {
+      e.preventDefault();
+      dragMove(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchend', e => {
+    if (isDragging) {
+      dragEnd();
+    }
   });
 
   function snapToClosest() {
@@ -196,7 +776,8 @@
     updateVideoBasedOnRotation(currentRotation);
   }
 
-  // Scroll con mouse
+  // Mouse Wheel Scroll
+  let wheelScrollTimeout;
   wheel.addEventListener('wheel', e => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? 15 : -15;
@@ -212,61 +793,228 @@
   function updateVideoBasedOnRotation(rotation) {
     const index = getClosestItemIndex(rotation);
     const selectedSong = songs[index];
-    const player = document.getElementById('youtube-player');
-    player.src = `https://www.youtube.com/embed/${selectedSong.youtubeId}?autoplay=1`;
+    
+    if (player && player.loadVideoById) {
+      player.loadVideoById(selectedSong.youtubeId);
+    }
     highlightActiveItem(index);
-    // Align the title with the arrow
+    document.getElementById('active-track-name').textContent = selectedSong.name;
+    
     const titleSpan = document.getElementById('selected-title');
     titleSpan.style.color = 'var(--main-color)';
     titleSpan.style.fontWeight = 'bold';
     titleSpan.style.fontSize = '18px';
-    // selectorAngle is where the arrow is (center of right semicircle, 90deg)
-    selector.classList.add('highlight');
+    document.getElementById('selector').classList.add('highlight');
   }
 
   function highlightActiveItem(index) {
     const items = document.querySelectorAll('.item');
     items.forEach((item, i) => {
       item.classList.remove('active');
-      // Show arrow and text for all items
       if (i === index) {
         item.classList.add('active');
-        item.innerHTML = '<span style="color: var(--main-color); font-size: 20px; vertical-align: middle;"></span> ' + songs[i].name;
-      } else {
-        item.innerHTML = '<span style="color: var(--inactive-color); font-size: 20px; vertical-align: middle;"></span> ' + songs[i].name;
       }
     });
-    // Arrow glow is handled in updateVideoBasedOnRotation
   }
 
   function getClosestItemIndex(rotation) {
-    // selectorAngle is where the arrow is (center of right semicircle, 90deg)
     let normalized = ((selectorAngle - rotation) % 360 + 360) % 360;
     let index = Math.round(normalized / anglePerItem) % songs.length;
     return index;
   }
 
-  function getSelectorAngle() {
-  // No longer needed, selectorAngle is fixed at 270deg (top center)
-  return selectorAngle;
-}
-
   function updateItemTransforms(rotation) {
     document.querySelectorAll('.item').forEach((item, i) => {
       const angle = anglePerItem * i;
-      // Space items evenly and keep text upright
       item.style.transform =
         `rotate(${angle}deg) translate(0, -280px) rotate(${-angle - rotation}deg)`;
     });
   }
 
-// Call this function whenever the wheel rotates:
-wheel.style.transform = `rotate(${currentRotation}deg)`;
-updateItemTransforms(currentRotation);
+  // Seek bar / Timeline UI updating
+  const progressBar = document.getElementById('progress-bar');
+  const currentTimeLabel = document.getElementById('current-time');
+  const totalTimeLabel = document.getElementById('total-time');
+  
+  progressBar.addEventListener('input', e => {
+    isSeeking = true;
+    if (player && player.getDuration) {
+      const duration = player.getDuration();
+      const newTime = (progressBar.value / 100) * duration;
+      currentTimeLabel.textContent = formatTime(newTime);
+    }
+  });
+  
+  progressBar.addEventListener('change', e => {
+    if (player && player.getDuration) {
+      const duration = player.getDuration();
+      const newTime = (progressBar.value / 100) * duration;
+      player.seekTo(newTime);
+    }
+    isSeeking = false;
+  });
+  
+  function formatTime(seconds) {
+    if (isNaN(seconds) || seconds === undefined) return '00:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+  
+  setInterval(() => {
+    if (player && player.getCurrentTime && player.getDuration && !isSeeking) {
+      const state = player.getPlayerState();
+      if (state === YT.PlayerState.PLAYING) {
+        const current = player.getCurrentTime();
+        const duration = player.getDuration();
+        if (duration > 0) {
+          progressBar.value = (current / duration) * 100;
+          currentTimeLabel.textContent = formatTime(current);
+          totalTimeLabel.textContent = formatTime(duration);
+        }
+      }
+    }
+  }, 500);
 
-// Also call updateItemTransforms in mousemove, mouseup, wheel, and snapToClosest
+  // Volume control
+  const volumeSlider = document.getElementById('volume-slider');
+  volumeSlider.addEventListener('input', () => {
+    if (player && player.setVolume) {
+      player.setVolume(volumeSlider.value);
+    }
+  });
 
-  updateVideoBasedOnRotation(0); // init
+  // Canvas visualizer animation
+  const canvas = document.getElementById('visualizer');
+  const ctx = canvas.getContext('2d');
+  
+  function resizeCanvas() {
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = canvas.parentElement.clientHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+  
+  function drawVisualizer() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    let isPlaying = player && player.getPlayerState && player.getPlayerState() === YT.PlayerState.PLAYING;
+    let amplitude = isPlaying ? 22 : 2;
+    let speed = isPlaying ? 0.07 : 0.01;
+    let waveCount = 3;
+    
+    waveOffset += speed;
+    
+    for (let w = 0; w < waveCount; w++) {
+      ctx.beginPath();
+      ctx.lineWidth = w === 0 ? 3 : 1.5;
+      
+      if (w === 0) {
+        ctx.strokeStyle = 'rgba(229, 9, 20, 0.85)';
+      } else if (w === 1) {
+        ctx.strokeStyle = 'rgba(168, 85, 247, 0.55)';
+      } else {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+      }
+      
+      const waveLength = 0.015 + w * 0.005;
+      const phase = waveOffset + w * Math.PI / 3;
+      
+      for (let x = 0; x < canvas.width; x++) {
+        const envelope = Math.sin((x / canvas.width) * Math.PI);
+        const y = (canvas.height / 2) + 
+                  Math.sin(x * waveLength + phase) * amplitude * envelope + 
+                  Math.cos(x * 0.025 - phase) * (amplitude * 0.35) * envelope;
+                  
+        if (x === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.stroke();
+    }
+    
+    animFrame = requestAnimationFrame(drawVisualizer);
+  }
+
+  // Set initial state
+  wheel.style.transform = `rotate(${currentRotation}deg)`;
+  updateItemTransforms(currentRotation);
+
+  // Screen Fitting Scale Logic (Sticking Disc to left border, player centered in remaining space)
+  function adjustLayout() {
+    const wheelWrapper = document.querySelector('.wheel-wrapper');
+    const playerDeck = document.querySelector('.player-deck');
+    const container = document.querySelector('.app-container');
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    if (viewportWidth <= 768) {
+      // Clear inline positioning styles for mobile portrait, let CSS handle it
+      wheelWrapper.style.position = '';
+      wheelWrapper.style.top = '';
+      wheelWrapper.style.left = '';
+      wheelWrapper.style.transform = '';
+      wheelWrapper.style.transformOrigin = '';
+      
+      playerDeck.style.position = '';
+      playerDeck.style.top = '';
+      playerDeck.style.left = '';
+      playerDeck.style.right = '';
+      playerDeck.style.transform = '';
+      playerDeck.style.transformOrigin = '';
+      
+      const mobileBaseWidth = 440;
+      const mobileBaseHeight = 920;
+      
+      const scaleX = (viewportWidth * 0.95) / mobileBaseWidth;
+      const scaleY = (viewportHeight * 0.95) / mobileBaseHeight;
+      const scale = Math.min(scaleX, scaleY, 1.0);
+      
+      container.style.position = 'absolute';
+      container.style.top = '50%';
+      container.style.left = '50%';
+      container.style.transform = `translate(-50%, -50%) scale(${scale})`;
+      return;
+    }
+    
+    // Desktop View - absolute/fixed viewport fill layout
+    container.style.position = 'static';
+    container.style.transform = 'none';
+    
+    const wheelBaseHeight = 700;
+    const deckBaseHeight = 600; // Increased base height for larger layout
+    
+    let wheelScale = (viewportHeight * 0.9) / wheelBaseHeight;
+    let deckScale = (viewportHeight * 0.9) / deckBaseHeight;
+    
+    wheelScale = Math.min(wheelScale, 1.15);
+    deckScale = Math.min(deckScale, 1.15);
+    
+    // Position Wheel EXACTLY on the left border of the screen, centered vertically
+    wheelWrapper.style.position = 'fixed';
+    wheelWrapper.style.top = '50%';
+    wheelWrapper.style.left = '0';
+    wheelWrapper.style.transform = `translateY(-50%) scale(${wheelScale})`;
+    wheelWrapper.style.transformOrigin = 'left center';
+    
+    // Center Player Deck in the remaining screen space on the right of the vinyl
+    const discRightEdge = 350 * wheelScale;
+    const remainingSpace = viewportWidth - discRightEdge;
+    const deckCenter = discRightEdge + (remainingSpace / 2);
+    
+    playerDeck.style.position = 'fixed';
+    playerDeck.style.top = '50%';
+    playerDeck.style.left = `${deckCenter}px`;
+    playerDeck.style.right = 'auto';
+    playerDeck.style.transform = `translate(-50%, -50%) scale(${deckScale})`;
+    playerDeck.style.transformOrigin = 'center center';
+  }
+
+  window.addEventListener('resize', adjustLayout);
+  adjustLayout();
+  setTimeout(adjustLayout, 100);
 </script>
 
 </body>
