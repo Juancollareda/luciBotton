@@ -127,6 +127,11 @@ createChallengeBtn.addEventListener('click', async () => {
         return;
     }
 
+    if (countryCode === currentCountry) {
+        showAlert('❌ You cannot challenge your own country!', '⚠️ Invalid Opponent');
+        return;
+    }
+
     try {
         // Get challenger info
         const myResponse = await fetch(`/api/country/${currentCountry}`);

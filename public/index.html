@@ -214,7 +214,7 @@
       <div class="challenge-form">
         <div class="input-group">
           <label for="challengeCountry">Target Country:</label>
-          <input type="text" id="challengeCountry" maxlength="3" placeholder="e.g. USA, AR, JP">
+          <input type="text" id="challengeCountry" maxlength="2" placeholder="e.g. US, AR, JP">
         </div>
         <div class="input-group">
           <label for="betAmount">Bet Amount:</label>
@@ -439,8 +439,9 @@
     </div>
   </div>
 <!-- Put this near your other missile elements -->
-<button id="frenzyMissileButton" style="display:none; background:red; color:white; font-size:1.5rem; padding:10px; margin-top:10px;">
-  CLICK FAST! 10s left
+<button id="frenzyMissileButton" style="display:none;">
+  <span>CLICK FAST!</span>
+  <span>30s</span>
 </button>
 <div id="frenzyMissileResult" style="margin-top:10px; color:#ffdd00; font-size:1.2rem;"></div>
 

@@ -13,16 +13,21 @@ function setupWebSocket(server) {
     });
 
     // Broadcast updates to all connected clients
-    function broadcast(messageObj) {
+    function broadcast(messageObj, secondaryData) {
         // Handle both object format {type, data} and (type, payload) format
         let message;
         if (typeof messageObj === 'string') {
-            // Legacy format or direct string
-            message = messageObj;
-        } else if (messageObj.type && messageObj.data !== undefined) {
+            // It was called as broadcast('eventType', payload/data)
+            // Pack it into a JSON object with both 'payload' and 'data' keys for compatibility
+            message = JSON.stringify({
+                type: messageObj,
+                payload: secondaryData,
+                data: secondaryData
+            });
+        } else if (messageObj && messageObj.type && messageObj.data !== undefined) {
             // New format: {type: 'eventType', data: {...}}
             message = JSON.stringify(messageObj);
-        } else if (messageObj.type && messageObj.payload !== undefined) {
+        } else if (messageObj && messageObj.type && messageObj.payload !== undefined) {
             // Old format: {type: 'eventType', payload: {...}}
             message = JSON.stringify(messageObj);
         } else {

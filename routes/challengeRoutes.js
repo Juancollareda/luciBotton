@@ -15,12 +15,20 @@ router.post('/api/challenge', async (req, res) => {
         const challengerCountry = geo ? geo.country : 'XX';
         const { challengedCountry, betAmount } = req.body;
 
+        // Prevent self-challenge
+        if (challengerCountry === challengedCountry) {
+            return res.status(400).json({ error: 'You cannot challenge your own country' });
+        }
+
         // Check if challenger has enough clicks
         const challengerClicks = await databaseService.getCountryClicks(challengerCountry);
 
         if (!challengerClicks || challengerClicks.clicks < betAmount) {
             return res.status(400).json({ error: 'Not enough clicks to place bet' });
         }
+
+        // Ensure challenged country exists in database to prevent Foreign Key constraint crash
+        await databaseService.updateCountryClicks(challengedCountry, 0);
 
         // Create the challenge
         const challengeId = await databaseService.createChallenge(
@@ -232,6 +240,11 @@ async function endChallenge(challengeId, challengeData) {
     try {
         const challenge = challengeData || activeChallenges.get(challengeId);
         if (!challenge) return;
+
+        // Prevent duplicate execution of endChallenge
+        if (challenge.status === 'completed') {
+            return;
+        }
 
         challenge.status = 'completed';
 

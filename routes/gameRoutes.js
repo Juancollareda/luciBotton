@@ -173,15 +173,25 @@ router.post('/missile/launch', async (req, res) => {
     // Grant shield to target (2 hour cooldown before next missile hit)
     await databaseService.grantShield(targetCountry, 120);
 
+    // Sync global counter since country clicks changed
+    await databaseService.syncGlobalCountToCountrySum();
+
     // Broadcast updates
     if (global.broadcast) {
-      global.broadcast('missileAttack', {
-        attacker: attackerCountry,
-        target: targetCountry,
-        damage: actualDamage,
-        targetNewClicks: newTargetClicks,
-        timestamp: new Date()
+      global.broadcast({
+        type: 'missileAttack',
+        data: {
+          attacker: attackerCountry,
+          target: targetCountry,
+          damage: actualDamage,
+          targetNewClicks: newTargetClicks,
+          timestamp: new Date()
+        }
       });
+
+      // Broadcast updated rankings to all players
+      const rankings = await databaseService.getAllCountryClicks();
+      global.broadcast('rankingUpdate', rankings);
     }
 
     res.json({
