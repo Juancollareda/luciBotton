@@ -1,6 +1,7 @@
 const databaseService = require('../services/databaseService');
 const getCountry = require('../utils/getCountry');
 const WebSocket = require('ws');
+const twitchService = require('../services/twitchService');
 
 // In-memory chat history caches (limit to 30 messages)
 const MAX_HISTORY = 30;
@@ -52,6 +53,12 @@ function setupWSHandlers(wss) {
 
         // Send initial rankings on connection
         broadcastRankings(global.broadcast);
+
+        // Send initial stream status
+        ws.send(JSON.stringify({
+            type: 'streamStatus',
+            data: { live: twitchService.getStreamStatus() }
+        }));
 
         // Send initial chat histories on connection
         const myCountryHistory = countryChatHistory.get(country) || [];

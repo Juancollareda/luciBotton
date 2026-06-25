@@ -2,6 +2,7 @@ const express = require('express');
 const databaseService = require('../services/databaseService');
 const getCountry = require('../utils/getCountry');
 const getIP = require('../utils/getIP');
+const twitchService = require('../services/twitchService');
 
 const router = express.Router();
 
@@ -13,7 +14,9 @@ router.get('/clicked', async (req, res) => {
   console.log('Click from IP:', ip, 'Country:', countryCode); // Debug log
 
   try {
-    const increment = boostActive ? 2 : 1;
+    const baseIncrement = boostActive ? 2 : 1;
+    const isLive = twitchService.getStreamStatus();
+    const increment = isLive ? baseIncrement * 2 : baseIncrement;
 
     // Update global counter
     await databaseService.updateGlobalCount(increment);
@@ -111,5 +114,15 @@ router.patch('/adjust-click', async (req, res) => {
   }
 });
 
+// Admin override to toggle Twitch live status manually
+router.get('/api/admin/set-live', (req, res) => {
+  const { password, live } = req.query;
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(403).send('Access denied. Wrong password.');
+  }
+  const liveBool = live === 'true';
+  twitchService.setLive(liveBool);
+  res.send(`Streamer live status manually set to: ${liveBool}`);
+});
 
 module.exports = { router, setBoostActive: (val) => { boostActive = val; } };

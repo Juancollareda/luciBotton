@@ -22,14 +22,18 @@ export const Count = {
       const x = event ? event.clientX : window.innerWidth / 2;
       const y = event ? event.clientY : window.innerHeight / 2;
       
-      // Determine click value (+2 if boost active, else +1)
-      let clickVal = "+1";
+      // Determine click value
+      let clicksAdded = 1;
       const boostTimerEl = document.getElementById('boostTimer');
       if (boostTimerEl && boostTimerEl.textContent.includes('Active')) {
-        clickVal = "+2";
+        clicksAdded = 2;
       }
       
-      window.Effects.spawnParticle(x, y, clickVal);
+      if (window.streamerLive) {
+        clicksAdded *= 2;
+      }
+      
+      window.Effects.spawnParticle(x, y, `+${clicksAdded}`);
     }
 
     fetch('/clicked')

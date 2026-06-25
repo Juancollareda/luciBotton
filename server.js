@@ -165,6 +165,10 @@ async function startServer() {
     // Start reset scheduler
     startResetScheduler();
     
+    // Start Twitch polling status check
+    const twitchService = require('./services/twitchService');
+    twitchService.startPolling();
+    
     // Start listening
     server.listen(PORT, () => {
       const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';

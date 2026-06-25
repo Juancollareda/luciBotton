@@ -82,4 +82,28 @@ window.onload = () => {
   setInterval(() => Boost.checkStatus(), 5000);
   setInterval(() => Missile.checkStatus(), 10000);
   setInterval(() => Golden.checkEndpoint(), 10000);
+
+  // Listen for stream live status updates via WebSocket
+  window.addEventListener('wsMessage', (event) => {
+    const data = event.detail;
+    if (data && data.type === 'streamStatus') {
+      window.streamerLive = !!data.data.live;
+      const banner = document.getElementById('liveIndicatorBanner');
+      const dot = document.getElementById('liveIndicatorDot');
+      const text = document.getElementById('liveIndicatorText');
+      if (banner && dot && text) {
+        if (window.streamerLive) {
+          banner.classList.remove('offline');
+          banner.classList.add('live');
+          dot.textContent = '🔴';
+          text.textContent = 'STREAM IS LIVE! 2X CLICKS ACTIVE!';
+        } else {
+          banner.classList.remove('live');
+          banner.classList.add('offline');
+          dot.textContent = '⚪';
+          text.textContent = 'STREAM IS OFFLINE';
+        }
+      }
+    }
+  });
 };
