@@ -2,9 +2,10 @@ const express = require('express');
 const geoip = require('geoip-lite');
 const databaseService = require('../services/databaseService');
 const getIP = require('../utils/getIP');
+const configService = require('../services/configService');
 
 const router = express.Router();
-const MISSILE_COOLDOWN_MS =  (1 * 60 * 60 * 1000)/2; // 30 minutes for testing
+const getMissileCooldownMs = () => configService.get('missileCooldownMinutes') * 60 * 1000;
 const ADMIN_PASSWORD = "supersecret123123ret123123";
 router.post('/missile', async (req, res) => {
   const ip = getIP(req);
@@ -18,7 +19,7 @@ router.post('/missile', async (req, res) => {
 
   try {
     // Cooldown check
-    const canLaunch = await databaseService.canLaunchMissile(userCountry, MISSILE_COOLDOWN_MS);
+    const canLaunch = await databaseService.canLaunchMissile(userCountry, getMissileCooldownMs());
     if (!canLaunch) {
       return res.status(403).send(`Your country ${userCountry} can only launch once per day.`);
     }
@@ -57,13 +58,13 @@ router.get('/missile-status', async (req, res) => {
     const geo = geoip.lookup(ip);
     const userCountry = geo?.country || 'XX';
 
-    const canLaunch = await databaseService.canLaunchMissile(userCountry, MISSILE_COOLDOWN_MS);
+    const canLaunch = await databaseService.canLaunchMissile(userCountry, getMissileCooldownMs());
     if (canLaunch) return res.json({ canLaunch: true });
 
     const lastMissile = await databaseService.getLastMissileTime(userCountry);
     const diff = Date.now() - new Date(lastMissile).getTime();
 
-    const remainingMs = MISSILE_COOLDOWN_MS - diff;
+    const remainingMs = getMissileCooldownMs() - diff;
     const hours = Math.floor(remainingMs / (1000*60*60));
     const minutes = Math.floor((remainingMs % (1000*60*60)) / (1000*60));
     const seconds = Math.floor((remainingMs % (1000*60)) / 1000);

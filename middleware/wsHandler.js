@@ -78,6 +78,32 @@ function setupWSHandlers(wss) {
                     await broadcastRankings(global.broadcast);
                 } else if (data.type === 'chatMessage') {
                     handleChatMessage(ws, wss, data.data);
+                } else if (data.type === 'requestChat') {
+                    const myCountryHistory = countryChatHistory.get(ws.country) || [];
+                    ws.send(JSON.stringify({
+                        type: 'chatInit',
+                        data: {
+                            global: globalChatHistory,
+                            country: myCountryHistory,
+                            userCountry: ws.country
+                        }
+                    }));
+                } else if (data.type === 'clearChat') {
+                    const ADMIN_PASSWORD = "supersecret123123ret123123";
+                    if (data.password === ADMIN_PASSWORD) {
+                        // Clear global history
+                        globalChatHistory.length = 0;
+                        // Clear country history map
+                        countryChatHistory.clear();
+                        
+                        // Broadcast chat cleared to all clients
+                        const payload = JSON.stringify({ type: 'chatCleared' });
+                        wss.clients.forEach(client => {
+                            if (client.readyState === WebSocket.OPEN) {
+                                client.send(payload);
+                            }
+                        });
+                    }
                 }
             } catch (err) {
                 console.error('Error handling WebSocket message:', err);

@@ -9,6 +9,7 @@ const databaseService = require('../services/databaseService');
 const getCountry = require('../utils/getCountry');
 const getIP = require('../utils/getIP');
 const geoip = require('geoip-lite');
+const configService = require('../services/configService');
 
 // ==================== TIER/RANKING ROUTES ====================
 
@@ -96,9 +97,10 @@ router.get('/stats/my-country', async (req, res) => {
 
 // ==================== IMPROVED MISSILE ROUTES ====================
 
-const MISSILE_COOLDOWN_MS = 30 * 60 * 1000; // 30 minutes
-const MISSILE_COST = 50; // Cost in clicks to launch
-const MAX_DAMAGE_PERCENT = 0.5; // Max 50% of target's clicks
+// Helper getters for dynamic configurations
+const getMissileCost = () => configService.get('missileCost');
+const getMissileCooldownMs = () => configService.get('missileCooldownMinutes') * 60 * 1000;
+const getMaxDamagePercent = () => configService.get('maxDamagePercent');
 
 /**
  * Launch missile with cost and damage cap
@@ -108,6 +110,9 @@ router.post('/missile/launch', async (req, res) => {
   try {
     const attackerCountry = getCountry(req);
     const targetCountry = req.body.targetCountry ? req.body.targetCountry.toUpperCase() : null;
+    const MISSILE_COST = getMissileCost();
+    const MISSILE_COOLDOWN_MS = getMissileCooldownMs();
+    const MAX_DAMAGE_PERCENT = getMaxDamagePercent();
     const requestedDamage = Math.max(MISSILE_COST, parseInt(req.body.damage) || MISSILE_COST);
 
     // Validation
@@ -141,7 +146,7 @@ router.post('/missile/launch', async (req, res) => {
     const target = await databaseService.getCountryClicks(targetCountry);
     if (!target) return res.status(404).json({ error: `No clicks recorded for ${targetCountry}` });
 
-    // Calculate actual damage (capped at 50% of target's clicks)
+    // Calculate actual damage (capped at maxDamagePercent of target's clicks)
     const maxDamage = Math.floor(target.clicks * MAX_DAMAGE_PERCENT);
     const actualDamage = Math.min(requestedDamage, maxDamage);
 
@@ -166,8 +171,9 @@ router.post('/missile/launch', async (req, res) => {
       total_damage_taken: actualDamage 
     });
 
-    // Grant shield to target (2 hour cooldown before next missile hit)
-    await databaseService.grantShield(targetCountry, 120);
+    // Grant shield to target
+    const shieldDur = configService.get('shieldDurationMinutes');
+    await databaseService.grantShield(targetCountry, shieldDur);
 
     // Sync global counter since country clicks changed
     await databaseService.syncGlobalCountToCountrySum();
@@ -197,7 +203,7 @@ router.post('/missile/launch', async (req, res) => {
       cost: MISSILE_COST,
       targetNewClicks: newTargetClicks,
       shieldGranted: true,
-      shieldDuration: 120
+      shieldDuration: shieldDur
     });
   } catch (error) {
     console.error('Error launching missile:', error);
@@ -212,6 +218,9 @@ router.post('/missile/launch', async (req, res) => {
 router.get('/missile/info', async (req, res) => {
   try {
     const countryCode = getCountry(req);
+    const MISSILE_COST = getMissileCost();
+    const MISSILE_COOLDOWN_MS = getMissileCooldownMs();
+    const MAX_DAMAGE_PERCENT = getMaxDamagePercent();
 
     const clicks = await databaseService.getCountryClicks(countryCode);
     const lastMissile = await databaseService.getLastMissileTime(countryCode);
@@ -685,5 +694,54 @@ router.post('/missile/reset', async (req, res) => {
   }
 });
 
+
+/**
+ * Get game configuration (admin only)
+ * GET /api/admin/config?password=...
+ */
+router.get('/admin/config', (req, res) => {
+  const password = req.query.password;
+  const ADMIN_PASSWORD = "supersecret123123ret123123";
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(403).json({ error: 'Unauthorized' });
+  }
+  res.json(configService.getAll());
+});
+
+/**
+ * Update game configuration (admin only)
+ * POST /api/admin/config?password=...
+ */
+router.post('/admin/config', (req, res) => {
+  const password = req.query.password;
+  const ADMIN_PASSWORD = "supersecret123123ret123123";
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(403).json({ error: 'Unauthorized' });
+  }
+  
+  const {
+    missileCost,
+    missileCooldownMinutes,
+    shieldDurationMinutes,
+    maxDamagePercent,
+    multiplierDurationSeconds,
+    boostMultiplier
+  } = req.body;
+
+  const newConfig = {};
+  if (missileCost !== undefined) newConfig.missileCost = parseInt(missileCost);
+  if (missileCooldownMinutes !== undefined) newConfig.missileCooldownMinutes = parseInt(missileCooldownMinutes);
+  if (shieldDurationMinutes !== undefined) newConfig.shieldDurationMinutes = parseInt(shieldDurationMinutes);
+  if (maxDamagePercent !== undefined) newConfig.maxDamagePercent = parseFloat(maxDamagePercent);
+  if (multiplierDurationSeconds !== undefined) newConfig.multiplierDurationSeconds = parseInt(multiplierDurationSeconds);
+  if (boostMultiplier !== undefined) newConfig.boostMultiplier = parseInt(boostMultiplier);
+
+  const success = configService.setAll(newConfig);
+  if (success) {
+    res.json({ message: 'Configuration updated successfully', config: configService.getAll() });
+  } else {
+    res.status(500).json({ error: 'Failed to save configuration' });
+  }
+});
 
 module.exports = router;

@@ -843,6 +843,7 @@
       <button class="tab-btn" onclick="switchTab('countries')">🌍 Countries</button>
       <button class="tab-btn" onclick="switchTab('testing')">🧪 Testing Tools</button>
       <button class="tab-btn" onclick="switchTab('chat')">💬 Command Chat</button>
+      <button class="tab-btn" onclick="switchTab('config')">⚙️ Configuration</button>
     </div>
 
     <!-- OVERVIEW TAB -->
@@ -1166,6 +1167,9 @@
           </label>
           <span style="color: rgba(255, 255, 255, 0.15)">|</span>
           <span>Role: <strong style="color: #ff3333;">SYS_ADMIN</strong></span>
+          <span style="color: rgba(255, 255, 255, 0.15)">|</span>
+          <button class="btn-info" onclick="refreshAdminChat()" style="width: auto; padding: 6px 12px; font-size: 11px; margin-top: 0; margin-bottom: 0;">🔄 Refresh Chat</button>
+          <button class="btn-danger" onclick="clearAdminChat()" style="width: auto; padding: 6px 12px; font-size: 11px; margin-top: 0; margin-bottom: 0;">🗑️ Erase All Chats</button>
         </div>
         <div class="admin-chat-container">
           <div class="admin-chat-messages" id="adminChatMessages">
@@ -1176,6 +1180,41 @@
             <button class="btn-primary" onclick="sendAdminChatMessage()" style="width: auto; padding: 12px 30px;">SEND</button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- CONFIGURATION TAB -->
+    <div id="config" class="tab-content">
+      <div class="card">
+        <h2>⚙️ Game Configuration</h2>
+        <div class="stats" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; text-align: left;">
+          <div class="form-group">
+            <label>Missile Launch Cost (Clicks)</label>
+            <input type="number" id="cfgMissileCost" min="1">
+          </div>
+          <div class="form-group">
+            <label>Missile Cooldown (Minutes)</label>
+            <input type="number" id="cfgMissileCooldown" min="1">
+          </div>
+          <div class="form-group">
+            <label>Post-Missile Shield (Minutes)</label>
+            <input type="number" id="cfgShieldDuration" min="1">
+          </div>
+          <div class="form-group">
+            <label>Max Damage Capping (0.0 to 1.0)</label>
+            <input type="number" id="cfgMaxDamage" min="0.0" max="1.0" step="0.05">
+          </div>
+          <div class="form-group">
+            <label>Multiplier Boost (Seconds)</label>
+            <input type="number" id="cfgMultiplierDuration" min="1">
+          </div>
+          <div class="form-group">
+            <label>Multi-Click Multiplier</label>
+            <input type="number" id="cfgBoostMultiplier" min="1">
+          </div>
+        </div>
+        <button class="btn-success" onclick="saveGameConfig()" style="width: auto; padding: 12px 30px;">Save Configuration</button>
+        <div id="configStatus" class="status"></div>
       </div>
     </div>
 
@@ -1320,6 +1359,9 @@
         stopCountryPolling();
       } else if (tabName === 'chat') {
         initChatWS();
+        stopCountryPolling();
+      } else if (tabName === 'config') {
+        loadGameConfig();
         stopCountryPolling();
       } else {
         stopCountryPolling();
@@ -1888,6 +1930,9 @@
             if (msg.channel === 'global') {
               appendAdminPanelMessage(msg, true);
             }
+          } else if (data.type === 'chatCleared') {
+            const chatBox = document.getElementById('adminChatMessages');
+            chatBox.innerHTML = '<div style="color: #ff3333; text-align: center; padding: 15px; font-family: \'Share Tech Mono\', monospace;">⚠ CHAT HISTORY CLEARED BY ADMIN.</div>';
           }
         } catch (e) {
           console.error(e);
@@ -1916,11 +1961,12 @@
       const flagStr = getFlagEmoji(msg.country);
       const adminBadge = msg.isAdmin ? '<span class="admin-badge" style="background:#e50914; color:#fff; font-size:9px; padding:1px 4px; border-radius:3px; font-weight:bold; margin-right:4px;">ADMIN</span>' : '';
       const userClass = msg.isAdmin ? 'admin-chat-user admin-highlight' : 'admin-chat-user';
+      const flagHTML = msg.isAdmin ? '' : `<span class="admin-chat-flag">${flagStr} ${msg.country}</span>`;
 
       msgEl.innerHTML = `
         <div class="admin-chat-meta">
           <span>[${timeStr}]</span>
-          <span class="admin-chat-flag">${flagStr} ${msg.country}</span>
+          ${flagHTML}
           ${adminBadge}
           <span class="${userClass}">${msg.nickname}</span>
         </div>
@@ -1966,6 +2012,76 @@
       chatWs.send(JSON.stringify(payload));
       input.value = '';
       input.focus();
+    }
+
+    function refreshAdminChat() {
+      if (chatWs && chatWs.readyState === WebSocket.OPEN) {
+        chatWs.send(JSON.stringify({ type: 'requestChat' }));
+      } else {
+        initChatWS();
+      }
+    }
+
+    function clearAdminChat() {
+      showModal('Erase All Chats', 'Are you sure you want to clear the entire chat history for all channels?', () => {
+        if (chatWs && chatWs.readyState === WebSocket.OPEN) {
+          chatWs.send(JSON.stringify({
+            type: 'clearChat',
+            password: ADMIN_PASSWORD
+          }));
+        } else {
+          alert('WebSocket not connected');
+        }
+      });
+    }
+
+    async function loadGameConfig() {
+      try {
+        const res = await fetch(`/api/admin/config?password=${ADMIN_PASSWORD}`);
+        if (!res.ok) throw new Error('Failed to load configuration');
+        const config = await res.json();
+        
+        document.getElementById('cfgMissileCost').value = config.missileCost;
+        document.getElementById('cfgMissileCooldown').value = config.missileCooldownMinutes;
+        document.getElementById('cfgShieldDuration').value = config.shieldDurationMinutes;
+        document.getElementById('cfgMaxDamage').value = config.maxDamagePercent;
+        document.getElementById('cfgMultiplierDuration').value = config.multiplierDurationSeconds;
+        document.getElementById('cfgBoostMultiplier').value = config.boostMultiplier;
+        
+        showStatus('configStatus', '✓ Configuration loaded successfully', 'success');
+      } catch (err) {
+        showStatus('configStatus', `✗ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function saveGameConfig() {
+      const missileCost = parseInt(document.getElementById('cfgMissileCost').value);
+      const missileCooldownMinutes = parseInt(document.getElementById('cfgMissileCooldown').value);
+      const shieldDurationMinutes = parseInt(document.getElementById('cfgShieldDuration').value);
+      const maxDamagePercent = parseFloat(document.getElementById('cfgMaxDamage').value);
+      const multiplierDurationSeconds = parseInt(document.getElementById('cfgMultiplierDuration').value);
+      const boostMultiplier = parseInt(document.getElementById('cfgBoostMultiplier').value);
+
+      try {
+        const res = await fetch(`/api/admin/config?password=${ADMIN_PASSWORD}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            missileCost,
+            missileCooldownMinutes,
+            shieldDurationMinutes,
+            maxDamagePercent,
+            multiplierDurationSeconds,
+            boostMultiplier
+          })
+        });
+
+        if (!res.ok) throw new Error('Failed to save configuration');
+        const data = await res.json();
+        showStatus('configStatus', `✓ ${data.message}`, 'success');
+      } catch (err) {
+        showStatus('configStatus', `✗ Error: ${err.message}`, 'error');
+      }
     }
 
     // Attach listeners on DOMContentLoaded

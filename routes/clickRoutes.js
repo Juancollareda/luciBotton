@@ -88,12 +88,31 @@ router.delete('/erase-country', async (req, res) => {
   if (!country_code) return res.status(400).send('Missing country_code');
 
   try {
-    const result = await databaseService.pool.query('DELETE FROM country_clicks WHERE country_code = $1', [country_code.toUpperCase()]);
+    const code = country_code.toUpperCase();
+    
+    // Delete references from dependent tables to avoid FK constraint violations
+    await databaseService.pool.query('DELETE FROM country_challenges WHERE challenger_country = $1 OR challenged_country = $1', [code]);
+    await databaseService.pool.query('DELETE FROM country_shields WHERE country_code = $1', [code]);
+    await databaseService.pool.query('DELETE FROM country_stats WHERE country_code = $1', [code]);
+    await databaseService.pool.query('DELETE FROM seasonal_rankings WHERE country_code = $1', [code]);
+    await databaseService.pool.query('DELETE FROM country_missiles WHERE country_code = $1', [code]);
+
+    const result = await databaseService.pool.query('DELETE FROM country_clicks WHERE country_code = $1', [code]);
     if (result.rowCount === 0) return res.status(404).send(`Country ${country_code} not found.`);
-    res.send(`Country ${country_code} clicks erased successfully.`);
+    
+    // Sync global clicks count
+    await databaseService.syncGlobalCountToCountrySum();
+
+    // Broadcast updated rankings to all clients
+    if (global.broadcast) {
+      const rankings = await databaseService.getAllCountryClicks();
+      global.broadcast('rankingUpdate', rankings);
+    }
+
+    res.send(`Country ${country_code} clicks and all related stats/challenges erased successfully.`);
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error deleting country clicks.');
+    res.status(500).send('Error deleting country clicks and related data.');
   }
 });
 
