@@ -1,43 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
-
 <head>
   <meta charset="UTF-8">
-  <title>Character Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Luci // Character Dossier</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="card.css">
 </head>
 <body>
-  <div class="card-container">
-    <div class="card">
-      <!-- Contenido principal -->
-      <img id="characterImage" src="image1.png" alt="Character">
-      <h2 id="characterTitle"></h2>
-      <p id="characterDesc"></p>
 
-      <div class="arrows">
-        <button onclick="prevImage()">←</button>
-        <button onclick="nextImage()">→</button>
+  <!-- Background Cyber HUD Grid -->
+  <div class="hud-background">
+    <div class="grid-overlay"></div>
+    <div class="scanlines"></div>
+    <div class="neon-light neon-red"></div>
+    <div class="neon-light neon-purple"></div>
+  </div>
+
+  <div class="dossier-wrapper">
+    <!-- Main Interactive Card -->
+    <div class="dossier-card" id="tilt-card">
+      
+      <!-- Top Scanner Readout Header -->
+      <div class="dossier-header">
+        <span class="system-tag">SYS_STATUS: ACTIVE</span>
+        <span class="id-tag">ID // LUCI-0824</span>
       </div>
 
-      <!-- Credits Tab dentro de la tarjeta -->
-      <div class="credits-tab">
-        <div class="tab-label">Credits</div>
-        <div class="credits-content">
-          <div class="credit">
-            <a href="https://x.com/Mengyingo" target="_blank">
-        
-            <img src="arist.jpg" alt="Artist">
-            </a>
-            <p><strong>Artist</strong><br>Mengyingo</p>
+      <!-- Hologram Screen Area -->
+      <div class="holo-screen">
+        <div class="holo-corners">
+          <div class="corner top-left"></div>
+          <div class="corner top-right"></div>
+          <div class="corner bottom-left"></div>
+          <div class="corner bottom-right"></div>
+        </div>
+        <div class="scan-bar"></div>
+        <img id="characterImage" src="BLACK_HAIR.png" alt="Character Portrait">
+      </div>
+
+      <!-- Content Dock -->
+      <div class="content-dock">
+        <!-- Title and description -->
+        <h1 id="characterTitle">LUCI CASUAL 1</h1>
+        <p id="characterDesc">A casual street style with a modern twist.</p>
+
+        <!-- Stats Block -->
+        <div class="stats-block">
+          <div class="stat-row">
+            <span class="stat-label">REFLEXES</span>
+            <div class="progress-container">
+              <div class="progress-bar red-glow" id="bar-reflexes" style="width: 0%"></div>
+            </div>
+            <span class="stat-val" id="val-reflexes">0%</span>
           </div>
-          <div class="credit">
-            <a href="https://x.com/DevilishNu" target="_blank">
-            <img src="rigger.jpg" alt="Rigger">
-            </a>
-            <p><strong>Rigger</strong><br>DevilishNu</p>
+          <div class="stat-row">
+            <span class="stat-label">CLICKS_SEC</span>
+            <div class="progress-container">
+              <div class="progress-bar purple-glow" id="bar-clicks" style="width: 0%"></div>
+            </div>
+            <span class="stat-val" id="val-clicks">0%</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">TECH_INDEX</span>
+            <div class="progress-container">
+              <div class="progress-bar blue-glow" id="bar-tech" style="width: 0%"></div>
+            </div>
+            <span class="stat-val" id="val-tech">0%</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">STYLE_INDEX</span>
+            <div class="progress-container">
+              <div class="progress-bar green-glow" id="bar-style" style="width: 0%"></div>
+            </div>
+            <span class="stat-val" id="val-style">0%</span>
           </div>
         </div>
+
+        <!-- Dossier metadata -->
+        <div class="meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">HEIGHT</span>
+            <span class="meta-val" id="meta-height">-</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">CLASS</span>
+            <span class="meta-val" id="meta-class">-</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">THREAT_LVL</span>
+            <span class="meta-val" id="meta-threat">-</span>
+          </div>
+        </div>
+
+        <!-- Outfit Selectors / Thumbnail Tabs -->
+        <div class="outfit-tabs">
+          <button class="outfit-tab active" onclick="selectOutfit(0)">01</button>
+          <button class="outfit-tab" onclick="selectOutfit(1)">02</button>
+          <button class="outfit-tab" onclick="selectOutfit(2)">03</button>
+          <button class="outfit-tab" onclick="selectOutfit(3)">04</button>
+        </div>
+
+        <!-- Bottom Arrows Nav -->
+        <div class="nav-row">
+          <button class="nav-btn" onclick="prevImage()">◀ PREV</button>
+          <button class="nav-btn" onclick="nextImage()">NEXT ▶</button>
+        </div>
+
+        <!-- Credits Drawer -->
+        <div class="credits-drawer" id="creditsDrawer">
+          <div class="drawer-header" onclick="toggleCredits()">
+            <span>CREDITS DATA DOSSIER</span>
+            <span id="drawerArrow">▲</span>
+          </div>
+          <div class="drawer-body">
+            <div class="credit">
+              <a href="https://x.com/Mengyingo" target="_blank">
+                <img src="arist.jpg" alt="Mengyingo Avatar">
+              </a>
+              <div class="credit-info">
+                <span class="role">ARTIST</span>
+                <span class="name">Mengyingo</span>
+              </div>
+            </div>
+            <div class="credit">
+              <a href="https://x.com/DevilishNu" target="_blank">
+                <img src="rigger.jpg" alt="DevilishNu Avatar">
+              </a>
+              <div class="credit-info">
+                <span class="role">RIGGER</span>
+                <span class="name">DevilishNu</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </div>

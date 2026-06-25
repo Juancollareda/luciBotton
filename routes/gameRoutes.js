@@ -7,6 +7,8 @@ const express = require('express');
 const router = express.Router();
 const databaseService = require('../services/databaseService');
 const getCountry = require('../utils/getCountry');
+const getIP = require('../utils/getIP');
+const geoip = require('geoip-lite');
 
 // ==================== TIER/RANKING ROUTES ====================
 
