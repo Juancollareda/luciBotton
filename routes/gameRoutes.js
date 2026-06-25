@@ -4,11 +4,9 @@
  */
 
 const express = require('express');
-const databaseService = require('../services/databaseService');
-const getIP = require('../utils/getIP');
-const geoip = require('geoip-lite');
-
 const router = express.Router();
+const databaseService = require('../services/databaseService');
+const getCountry = require('../utils/getCountry');
 
 // ==================== TIER/RANKING ROUTES ====================
 
@@ -70,9 +68,7 @@ router.get('/country/:code', async (req, res) => {
  */
 router.get('/stats/my-country', async (req, res) => {
   try {
-    const ip = getIP(req);
-    const geo = geoip.lookup(ip);
-    const countryCode = geo ? geo.country : 'XX';
+    const countryCode = getCountry(req);
 
     const clicks = await databaseService.getCountryClicks(countryCode);
     const stats = await databaseService.getCountryStats(countryCode);
@@ -108,9 +104,7 @@ const MAX_DAMAGE_PERCENT = 0.5; // Max 50% of target's clicks
  */
 router.post('/missile/launch', async (req, res) => {
   try {
-    const ip = getIP(req);
-    const geo = geoip.lookup(ip);
-    const attackerCountry = geo ? geo.country : 'XX';
+    const attackerCountry = getCountry(req);
     const targetCountry = req.body.targetCountry ? req.body.targetCountry.toUpperCase() : null;
     const requestedDamage = Math.max(MISSILE_COST, parseInt(req.body.damage) || MISSILE_COST);
 
@@ -215,9 +209,7 @@ router.post('/missile/launch', async (req, res) => {
  */
 router.get('/missile/info', async (req, res) => {
   try {
-    const ip = getIP(req);
-    const geo = geoip.lookup(ip);
-    const countryCode = geo ? geo.country : 'XX';
+    const countryCode = getCountry(req);
 
     const clicks = await databaseService.getCountryClicks(countryCode);
     const lastMissile = await databaseService.getLastMissileTime(countryCode);

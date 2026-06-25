@@ -48,14 +48,16 @@
       to { transform: translateX(0); opacity: 1; }
     }
     .stats-panel {
-      position: fixed;
-      left: 20px;
-      top: 20px;
-      background: rgba(0, 0, 0, 0.8);
-      padding: 15px;
-      border-radius: 10px;
+      position: relative;
+      margin: 20px auto;
+      background: rgba(0, 0, 0, 0.85);
+      border: 2px solid #ff4d4d;
+      padding: 20px;
+      border-radius: 15px;
       color: white;
-      z-index: 1000;
+      z-index: 100;
+      max-width: 320px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     }
     .game-title {
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
@@ -104,7 +106,7 @@
 
     /* Shop Styles */
     .shop-content {
-      min-width: 600px;
+      width: 90%;
       max-width: 800px;
       max-height: 80vh;
       overflow-y: auto;
@@ -361,26 +363,31 @@
 
 <body>
   <!-- Game Features Tooltip -->
-  <div class="feature-tooltip">
-    <h3>🎮 Game Features</h3>
-    <ul>
-      <li>
-        <img src="bunbat clicker.png" alt="Challenge">
-        Challenge other countries to clicking duels!
-      </li>
-      <li>
-        <img src="bunbat missil.png" alt="Missile">
-        Launch missiles to steal clicks
-      </li>
-      <li>
-        <img src="bunbat golden.png" alt="Golden">
-        Click golden bunbats for bonus points
-      </li>
-      <li>
-        <img src="bunbat help.png" alt="Help">
-        Need help? Click for instructions
-      </li>
-    </ul>
+  <div class="feature-tooltip" id="featuresTooltip">
+    <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" id="toggleFeatures">
+      <h3 style="margin:0; font-size:1.1rem; color:#ff4d4d; user-select:none;">🎮 Game Features</h3>
+      <span id="featuresArrow" style="margin-left:15px; color:#ff4d4d; font-size:0.8rem; user-select:none;">▼</span>
+    </div>
+    <div id="featuresContent">
+      <ul>
+        <li>
+          <img src="bunbat clicker.png" alt="Challenge">
+          Challenge other countries to clicking duels!
+        </li>
+        <li>
+          <img src="bunbat missil.png" alt="Missile">
+          Launch missiles to steal clicks
+        </li>
+        <li>
+          <img src="bunbat golden.png" alt="Golden">
+          Click golden bunbats for bonus points
+        </li>
+        <li>
+          <img src="bunbat help.png" alt="Help">
+          Need help? Click for instructions
+        </li>
+      </ul>
+    </div>
   </div>
 
   <div class="left">
@@ -400,7 +407,11 @@
 
     <!-- Stats Panel -->
     <div class="stats-panel">
-      <div id="topFlag" style="margin-bottom: 10px;"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; width:100%; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px; margin-bottom:10px; user-select:none;" id="toggleTopCountry">
+        <span style="font-weight:bold; font-size:0.9rem; color:#aaa;">🏆 Top Country</span>
+        <span id="topCountryArrow" style="font-size:0.8rem; color:#aaa;">▼</span>
+      </div>
+      <div id="topFlag" style="margin-bottom: 10px; display:flex; align-items:center; justify-content:center;"></div>
       <div id="response" style="font-size: 2rem; margin-bottom: 5px;"></div>
       <div id="response2" style="font-size: 1rem; color: #ffdd00;"></div>
     </div>
@@ -455,6 +466,25 @@
     Autoclicker
   </div>
 </div>-->
+    
+    <!-- Chat Container -->
+    <div class="chat-container">
+      <div class="chat-header">
+        <div class="chat-tabs">
+          <button class="chat-tab-btn active" id="btnGlobalChat">Global Chat</button>
+          <button class="chat-tab-btn" id="btnCountryChat">Country Chat (<span id="userCountryCode">XX</span>)</button>
+        </div>
+        <div class="nickname-container">
+          <input type="text" id="chatNickname" placeholder="Nickname" maxlength="15">
+        </div>
+      </div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Type a message..." maxlength="100">
+        <button id="chatSendBtn">Send</button>
+      </div>
+    </div>
+
     <div id="ranking">
       <h2>Ranking by country</h2>
       <table>

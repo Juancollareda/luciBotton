@@ -1,12 +1,11 @@
 const Golden = {
-  score: 0,
   apple: null,
-  scoreDisplay: null,
-  _cooldown: false, // cooldown interno
+  _cooldown: false, // Internal cooldown to prevent double spawns
   _clickActive: false, // Track if apple is currently clickable
-  _clickCount: 0, // Count clicks on current apple
+  _timeoutId: null, // Timeout to hide apple
+  _intervalId: null, // Interval for visual fade out
 
-  // función para esperar a que un elemento exista en el DOM
+  // Helper function to wait for elements to exist in the DOM
   waitForElement(selector, callback) {
     const el = document.querySelector(selector);
     if (el) return callback(el);
@@ -23,33 +22,31 @@ const Golden = {
   },
 
   init() {
-    // esperamos a que #apple exista
     this.waitForElement("#apple", (appleEl) => {
       this.apple = appleEl;
 
-      // Si querés usar #score, descomenta la siguiente línea
-      // this.scoreDisplay = document.getElementById("score");
-
-      // Setup click handler with 10 second active window
-      this.apple.addEventListener("click", async () => {
+      // Click event handler
+      this.apple.addEventListener("click", async (event) => {
         if (!this._clickActive) return;
         
-        this._clickCount++;
+        // Disable further clicking immediately
+        this._clickActive = false;
         
-        // Visual feedback on click
-        this.apple.style.transform = 'scale(1.1)';
-        setTimeout(() => {
-          this.apple.style.transform = 'scale(1)';
-        }, 100);
+        // Spawn floating golden click particle (+1000)
+        if (window.Effects) {
+          const x = event ? event.clientX : window.innerWidth / 2;
+          const y = event ? event.clientY : window.innerHeight / 2;
+          window.Effects.spawnParticle(x, y, '+1000');
+        }
+        
+        // Hide the apple immediately after the first click
+        this.hideApple();
 
         try {
-          console.log(`Golden apple click #${this._clickCount}, reporting to server...`);
+          console.log(`Golden apple clicked once, reporting to server...`);
           const res = await fetch("/clickedgolden");
           const text = await res.text();
           console.log("Server response:", text);
-
-          // Update score if element exists
-          // if (this.scoreDisplay) this.scoreDisplay.textContent = text;
         } catch (err) {
           console.error("Error reporting golden click:", err);
         }
@@ -58,13 +55,19 @@ const Golden = {
   },
 
   spawnApple() {
-    if (!this.apple || this._cooldown) return; // no spawn si en cooldown
+    if (!this.apple || this._cooldown) return;
 
-    const screenW = window.innerWidth;
-    const screenH = window.innerHeight;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
-    const x = Math.random() * (screenW - 80);
-    const y = Math.random() * (screenH - 80);
+    // Safe zones: padding from left/right edges, top header, and bottom toolbar
+    const paddingX = 80;
+    const paddingTop = 120;
+    const paddingBottom = 160;
+
+    // Calculate safe coordinates relative to the viewport
+    const x = paddingX + Math.random() * (width - paddingX * 2);
+    const y = paddingTop + Math.random() * (height - (paddingTop + paddingBottom));
 
     this.apple.style.left = `${x}px`;
     this.apple.style.top = `${y}px`;
@@ -72,11 +75,10 @@ const Golden = {
     this.apple.style.cursor = 'pointer';
     this.apple.style.animation = 'bounce 0.5s ease-in-out';
 
-    // Reset click count and make clickable
-    this._clickCount = 0;
     this._clickActive = true;
+    this._cooldown = true;
 
-    // Broadcast notification to other players
+    // Broadcast spawn notification to other players
     try {
       fetch('/api/golden/spawn', {
         method: 'POST',
@@ -87,27 +89,42 @@ const Golden = {
       console.error('Golden broadcast error:', err);
     }
 
-    // Activar cooldown: apple is clickable for 10 seconds
-    this._cooldown = true;
-    const activeTime = 10000; // 10 seconds
-    
-    const countdownInterval = setInterval(() => {
-      // Visual countdown effect
-      const opacity = 1 - ((10000 - activeTime) / 10000) * 0.5;
-      this.apple.style.opacity = Math.max(0.5, opacity);
+    // Set countdown timers (apple remains visible for 10 seconds)
+    const activeTime = 10000;
+    let startTime = Date.now();
+
+    if (this._timeoutId) clearTimeout(this._timeoutId);
+    if (this._intervalId) clearInterval(this._intervalId);
+
+    // Smooth visual fade out countdown
+    this._intervalId = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const opacity = 1 - (elapsed / activeTime) * 0.5;
+      if (this.apple) {
+        this.apple.style.opacity = Math.max(0.5, opacity);
+      }
     }, 100);
 
-    setTimeout(() => {
-      clearInterval(countdownInterval);
-      this._clickActive = false; // No longer clickable
-      this.apple.style.opacity = '1';
-      
-      // Hide the apple after 10 seconds
-      this.apple.style.display = "none";
-      this._cooldown = false;
-      
-      console.log(`Golden bunbat disappeared after being clicked ${this._clickCount} times`);
+    this._timeoutId = setTimeout(() => {
+      this.hideApple();
+      console.log('Golden bunbat disappeared without being clicked.');
     }, activeTime);
+  },
+
+  hideApple() {
+    // Clear timers
+    if (this._timeoutId) clearTimeout(this._timeoutId);
+    if (this._intervalId) clearInterval(this._intervalId);
+    this._timeoutId = null;
+    this._intervalId = null;
+
+    this._clickActive = false;
+    this._cooldown = false;
+
+    if (this.apple) {
+      this.apple.style.display = "none";
+      this.apple.style.opacity = '1';
+    }
   },
 
   async checkEndpoint() {

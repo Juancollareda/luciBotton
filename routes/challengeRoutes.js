@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const databaseService = require('../services/databaseService');
-const getIP = require('../utils/getIP');
-const geoip = require('geoip-lite');
+const getCountry = require('../utils/getCountry');
 
 // Store active challenges in memory for click tracking
 const activeChallenges = new Map();
@@ -10,9 +9,7 @@ const activeChallenges = new Map();
 // Create a new challenge
 router.post('/api/challenge', async (req, res) => {
     try {
-        const ip = getIP(req);
-        const geo = geoip.lookup(ip);
-        const challengerCountry = geo ? geo.country : 'XX';
+        const challengerCountry = getCountry(req);
         const { challengedCountry, betAmount } = req.body;
 
         // Prevent self-challenge
@@ -71,9 +68,7 @@ router.post('/api/challenge', async (req, res) => {
 router.post('/api/challenge/:id/accept', async (req, res) => {
     try {
         const challengeId = req.params.id;
-        const ip = getIP(req);
-        const geo = geoip.lookup(ip);
-        const acceptingCountry = geo ? geo.country : 'XX';
+        const acceptingCountry = getCountry(req);
 
         // Get challenge details
         const challenge = await databaseService.getChallenge(challengeId);
@@ -140,9 +135,7 @@ router.post('/api/challenge/:id/accept', async (req, res) => {
 router.post('/api/challenge/:id/click', async (req, res) => {
     try {
         const challengeId = req.params.id;
-        const ip = getIP(req);
-        const geo = geoip.lookup(ip);
-        const countryCode = geo ? geo.country : 'XX';
+        const countryCode = getCountry(req);
 
         // Check if challenge exists and is active
         const challengeData = activeChallenges.get(challengeId);
@@ -318,9 +311,7 @@ async function endChallenge(challengeId, challengeData) {
 // Get active challenges
 router.get('/api/challenges', async (req, res) => {
     try {
-        const ip = getIP(req);
-        const geo = geoip.lookup(ip);
-        const countryCode = geo ? geo.country : 'XX';
+        const countryCode = getCountry(req);
 
         const challenges = await databaseService.getChallengesForCountry(countryCode);
         res.json(challenges);

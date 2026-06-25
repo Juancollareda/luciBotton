@@ -1,6 +1,6 @@
 const express = require('express');
-const geoip = require('geoip-lite');
 const databaseService = require('../services/databaseService');
+const getCountry = require('../utils/getCountry');
 const getIP = require('../utils/getIP');
 
 const router = express.Router();
@@ -9,8 +9,7 @@ let boostActive = false;
 const ADMIN_PASSWORD = "supersecret123123ret123123";
 router.get('/clicked', async (req, res) => {
   const ip = getIP(req);
-  const geo = geoip.lookup(ip);
-  const countryCode = geo?.country || 'XX';
+  const countryCode = getCountry(req);
   console.log('Click from IP:', ip, 'Country:', countryCode); // Debug log
 
   try {
@@ -40,8 +39,7 @@ router.get('/clicked', async (req, res) => {
 
 router.get('/clickedgolden', async (req, res) => {
   const ip = getIP(req);
-  const geo = geoip.lookup(ip);
-  const countryCode = geo?.country || 'XX';
+  const countryCode = getCountry(req);
   console.log("Golden apple clicked from IP:", ip, "Country:", countryCode);
 
   try {

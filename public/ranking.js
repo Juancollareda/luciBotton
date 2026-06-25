@@ -23,9 +23,10 @@ export const Ranking = {
           console.debug('Received non-JSON WebSocket message:', event.data);
           return;
         }
-        if (data.type === 'rankingUpdate') {
-          this.updateTable(data.payload);
-        }
+        
+        // Dispatch a custom event so other modules can handle WebSocket messages
+        const wsEvent = new CustomEvent('wsMessage', { detail: data });
+        window.dispatchEvent(wsEvent);
       };
 
       this.ws.onerror = (error) => {
@@ -35,9 +36,14 @@ export const Ranking = {
       console.error('Failed to initialize WebSocket:', error);
     }
 
-    this.ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
+    // Handle rankingUpdate events dispatched via wsMessage
+    window.addEventListener('wsMessage', (event) => {
+      const data = event.detail;
+      if (data && data.type === 'rankingUpdate') {
+        const payload = data.payload !== undefined ? data.payload : data.data;
+        this.updateTable(payload);
+      }
+    });
 
     this.ws.onclose = () => {
       console.log('WebSocket closed, attempting to reconnect...');

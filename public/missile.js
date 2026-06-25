@@ -77,6 +77,9 @@ export const Missile = {
             button.style.display = 'flex';
             resultEl.innerHTML = `<span style="color: #f39c12;">🚀 Frenzy active! CLICK THE RED BUTTON FAST!</span><br><small>Cost: ${Missile.MISSILE_COST} clicks</small>`;
 
+            // Toggle screen glow overlay
+            if (window.Effects) window.Effects.setFrenzyGlow(true);
+
             let countdown = 30;
             button.innerHTML = `<span>CLICK FAST!</span><span style="font-size: 1.8rem; margin-top: 5px;">${countdown}s</span>`;
 
@@ -87,6 +90,7 @@ export const Missile = {
                 clearInterval(interval);
                 Missile.frenzyActive = false;
                 button.style.display = 'none';
+                if (window.Effects) window.Effects.setFrenzyGlow(false);
                 resultEl.innerHTML = `<span style="color: #f39c12;">Launching missile...</span>`;
 
                 // Launch the missile

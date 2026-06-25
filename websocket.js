@@ -1,11 +1,15 @@
 const WebSocket = require('ws');
+const getCountry = require('./utils/getCountry');
 
 function setupWebSocket(server) {
     const wss = new WebSocket.Server({ server });
     const clients = new Set();
 
-    wss.on('connection', (ws) => {
+    wss.on('connection', (ws, req) => {
         clients.add(ws);
+        
+        // Associate country with client connection
+        ws.country = getCountry(req);
 
         ws.on('close', () => {
             clients.delete(ws);

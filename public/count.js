@@ -11,11 +11,26 @@ export const Count = {
       .catch(console.error);
   },
 
-  click: () => {
+  click: (event) => {
     // Optimistically update UI
     const sound = document.getElementById('clickSound');
     sound.currentTime = 0;
     sound.play();
+
+    // Spawn floating click particle at click coordinates
+    if (window.Effects) {
+      const x = event ? event.clientX : window.innerWidth / 2;
+      const y = event ? event.clientY : window.innerHeight / 2;
+      
+      // Determine click value (+2 if boost active, else +1)
+      let clickVal = "+1";
+      const boostTimerEl = document.getElementById('boostTimer');
+      if (boostTimerEl && boostTimerEl.textContent.includes('Active')) {
+        clickVal = "+2";
+      }
+      
+      window.Effects.spawnParticle(x, y, clickVal);
+    }
 
     fetch('/clicked')
       .then(res => res.text())

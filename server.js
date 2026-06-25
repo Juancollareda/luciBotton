@@ -21,6 +21,14 @@ if (process.env.NODE_ENV === 'production') {
 // Enable trust proxy for Heroku/Render
 app.enable('trust proxy');
 
+// Set country cookie if passed as query parameter for localhost testing
+app.use((req, res, next) => {
+    if (req.query.country) {
+        res.setHeader('Set-Cookie', `country=${req.query.country.toUpperCase()}; Path=/`);
+    }
+    next();
+});
+
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 

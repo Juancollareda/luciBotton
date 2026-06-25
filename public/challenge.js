@@ -322,6 +322,9 @@ function startDuel(challengeId, challengerCountry, challengedCountry, myCountry)
     // Close the modal
     challengeModal.style.display = 'none';
 
+    // Toggle screen glow overlay
+    if (window.Effects) window.Effects.setFrenzyGlow(true);
+
     // Create the duel button
     const duelButton = document.createElement('button');
     duelButton.id = 'duelButton';
@@ -419,6 +422,9 @@ function startDuel(challengeId, challengerCountry, challengedCountry, myCountry)
 function endDuel(challengeId, duelButton, statsDisplay) {
     // Remove button
     duelButton.remove();
+
+    // Toggle screen glow overlay off
+    if (window.Effects) window.Effects.setFrenzyGlow(false);
     
     // Fetch results
     fetch(`/api/challenge/${challengeId}/result`)
