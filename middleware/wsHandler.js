@@ -98,12 +98,16 @@ function handleChatMessage(ws, wss, msgData) {
     const sanitizedText = sanitizeString(text);
     const sanitizedNickname = sanitizeString(nickname).substring(0, 15) || 'Anonymous';
 
+    const ADMIN_PASSWORD = "supersecret123123ret123123";
+    const isAdmin = msgData.password === ADMIN_PASSWORD;
+
     const messageObj = {
         channel,
         text: sanitizedText,
         nickname: sanitizedNickname,
         country: ws.country,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        isAdmin: isAdmin
     };
 
     if (channel === 'global') {

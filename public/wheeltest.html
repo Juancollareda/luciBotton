@@ -394,9 +394,121 @@
     body {
         background: radial-gradient(circle at center, #1a0203 0%, var(--bg-color) 100%);
     }
+
+    /* Global Futuristic Navbar */
+    .global-navbar {
+      position: fixed;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 600px;
+      height: 50px;
+      background: rgba(10, 10, 12, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(229, 9, 20, 0.35);
+      border-radius: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 25px;
+      box-sizing: border-box;
+      z-index: 9999;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(229, 9, 20, 0.15);
+      font-family: 'Share Tech Mono', 'Orbitron', monospace;
+    }
+
+    .global-navbar .nav-brand {
+      font-size: 14px;
+      font-weight: bold;
+      color: #fff;
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .global-navbar .nav-brand::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #e50914;
+      box-shadow: 0 0 8px #e50914;
+      animation: pulse-dot-navbar 1.5s infinite alternate;
+    }
+
+    @keyframes pulse-dot-navbar {
+      0% { opacity: 0.4; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1.1); }
+    }
+
+    .global-navbar .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .global-navbar .nav-link {
+      color: #aaa;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      transition: all 0.2s ease-in-out;
+      padding: 6px 12px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+    }
+
+    .global-navbar .nav-link:hover {
+      color: #fff;
+      background: rgba(229, 9, 20, 0.1);
+      border-color: rgba(229, 9, 20, 0.25);
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+    }
+
+    .global-navbar .nav-link.active {
+      color: #fff;
+      background: #e50914;
+      border-color: #e50914;
+      box-shadow: 0 0 12px rgba(229, 9, 20, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      .global-navbar {
+        width: 95%;
+        padding: 0 15px;
+        top: 10px;
+        height: 45px;
+      }
+      .global-navbar .nav-brand {
+        font-size: 11px;
+        letter-spacing: 1px;
+      }
+      .global-navbar .nav-links {
+        gap: 10px;
+      }
+      .global-navbar .nav-link {
+        font-size: 10px;
+        padding: 4px 8px;
+        letter-spacing: 1px;
+      }
+    }
   </style>
 </head>
 <body>
+  <!-- Global Futuristic Navbar -->
+  <nav class="global-navbar">
+    <div class="nav-brand">PROJECT // BUNBAT</div>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">🎮 GAME HUB</a>
+      <a href="wheeltest.html" class="nav-link active">🎵 MUSIC DECK</a>
+      <a href="model.html" class="nav-link">👤 DOSSIER</a>
+    </div>
+  </nav>
 
 <div class="app-container">
   <!-- Left Side: Turntable -->
@@ -944,6 +1056,6 @@
   adjustLayout();
   setTimeout(adjustLayout, 100);
 </script>
-
+<script src="admin-portal.js" defer></script>
 </body>
 </html>

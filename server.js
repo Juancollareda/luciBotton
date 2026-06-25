@@ -147,7 +147,8 @@ if (process.env.NODE_ENV === 'production') {
 
 const { wss, broadcast } = setupWebSocket(server);
 
-// Make broadcast available globally
+// Make wss and broadcast available globally
+global.wss = wss;
 global.broadcast = broadcast;
 
 // Setup WebSocket handlers

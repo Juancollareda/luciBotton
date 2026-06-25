@@ -1367,3 +1367,130 @@
     font-size: 0.9rem;
   }
 }
+
+/* Global Futuristic Navbar */
+.global-navbar {
+  position: fixed;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 600px;
+  height: 50px;
+  background: rgba(10, 10, 12, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(229, 9, 20, 0.35);
+  border-radius: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 25px;
+  box-sizing: border-box;
+  z-index: 9999;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(229, 9, 20, 0.15);
+  font-family: 'Share Tech Mono', 'Fredoka One', monospace;
+}
+
+.global-navbar .nav-brand {
+  font-size: 14px;
+  font-weight: bold;
+  color: #fff;
+  letter-spacing: 2px;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.global-navbar .nav-brand::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e50914;
+  box-shadow: 0 0 8px #e50914;
+  animation: pulse-dot-navbar 1.5s infinite alternate;
+}
+
+@keyframes pulse-dot-navbar {
+  0% { opacity: 0.4; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1.1); }
+}
+
+.global-navbar .nav-links {
+  display: flex;
+  gap: 20px;
+}
+
+.global-navbar .nav-link {
+  color: #aaa;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  transition: all 0.2s ease-in-out;
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+}
+
+.global-navbar .nav-link:hover {
+  color: #fff;
+  background: rgba(229, 9, 20, 0.1);
+  border-color: rgba(229, 9, 20, 0.25);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+.global-navbar .nav-link.active {
+  color: #fff;
+  background: #e50914;
+  border-color: #e50914;
+  box-shadow: 0 0 12px rgba(229, 9, 20, 0.5);
+}
+
+@media (max-width: 768px) {
+  .global-navbar {
+    width: 95%;
+    padding: 0 15px;
+    top: 10px;
+    height: 45px;
+  }
+  .global-navbar .nav-brand {
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+  .global-navbar .nav-links {
+    gap: 10px;
+  }
+  .global-navbar .nav-link {
+    font-size: 10px;
+    padding: 4px 8px;
+    letter-spacing: 1px;
+  }
+}
+
+/* Admin Chat Highlight Styles */
+.chat-message.admin-message {
+  background: rgba(229, 9, 20, 0.15) !important;
+  border-left-color: #e50914 !important;
+  box-shadow: 0 0 10px rgba(229, 9, 20, 0.2);
+}
+
+.chat-user.admin-user {
+  color: #ff5555 !important;
+  text-shadow: 0 0 8px rgba(255, 59, 48, 0.6) !important;
+}
+
+.admin-badge {
+  background: #e50914;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 1px 4px;
+  border-radius: 3px;
+  text-shadow: none;
+  box-shadow: 0 0 5px rgba(229, 9, 20, 0.5);
+  margin-right: 4px;
+}

@@ -10,223 +10,288 @@
       box-sizing: border-box;
     }
 
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&family=Segoe+UI:wght@400;600&display=swap');
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background: #090a0f;
       min-height: 100vh;
       padding: 20px;
+      color: #dfdfe9;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 4px, 6px 100%;
+      pointer-events: none;
+      z-index: 99999;
     }
 
     .container {
       max-width: 1400px;
       margin: 0 auto;
+      padding: 20px 0;
     }
 
     .header {
-      background: rgba(0, 0, 0, 0.8);
-      color: #ffd700;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
+      background: rgba(14, 16, 22, 0.75);
+      border: 1px solid rgba(229, 9, 20, 0.35);
+      color: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 30px;
       text-align: center;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 15px rgba(229, 9, 20, 0.1);
+      position: relative;
     }
 
     .header h1 {
-      font-size: 32px;
+      font-family: 'Orbitron', 'Share Tech Mono', sans-serif;
+      font-size: 30px;
       margin-bottom: 5px;
+      letter-spacing: 2px;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    .header p {
+      font-family: 'Share Tech Mono', monospace;
+      color: #888;
+      font-size: 13px;
+      letter-spacing: 1px;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 20px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
     }
 
     .card {
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      background: rgba(14, 16, 22, 0.85);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(229, 9, 20, 0.25);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.01);
+      transition: all 0.3s;
+    }
+
+    .card:hover {
+      border-color: rgba(229, 9, 20, 0.4);
+      box-shadow: 0 10px 35px rgba(229, 9, 20, 0.08), 0 0 10px rgba(0,0,0,0.5);
     }
 
     .card h2 {
-      color: #667eea;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #667eea;
-      font-size: 18px;
+      color: #e50914;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid rgba(229, 9, 20, 0.4);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 16px;
+      letter-spacing: 1.5px;
+      text-shadow: 0 0 8px rgba(229, 9, 20, 0.3);
     }
 
     .form-group {
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
 
     label {
       display: block;
-      margin-bottom: 5px;
-      color: #333;
+      margin-bottom: 6px;
+      color: #aaa;
       font-weight: 500;
-      font-size: 14px;
+      font-size: 12px;
+      font-family: 'Share Tech Mono', monospace;
+      letter-spacing: 1px;
     }
 
     input, select {
       width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
+      padding: 12px;
+      background: rgba(5, 5, 5, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
       font-size: 14px;
-      transition: border-color 0.3s;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      transition: all 0.3s;
     }
 
     input:focus, select:focus {
       outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+      border-color: #e50914;
+      box-shadow: 0 0 10px rgba(229, 9, 20, 0.25);
     }
 
     button {
-      padding: 10px 20px;
+      padding: 12px 20px;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: bold;
       transition: all 0.3s;
-      font-size: 14px;
+      font-size: 13px;
       width: 100%;
+      font-family: 'Share Tech Mono', monospace;
+      letter-spacing: 1.5px;
     }
 
     .btn-primary {
-      background-color: #667eea;
+      background-color: #e50914;
       color: white;
+      box-shadow: 0 4px 12px rgba(229, 9, 20, 0.2);
     }
 
     .btn-primary:hover {
-      background-color: #5568d3;
+      background-color: #ff222d;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 4px 18px rgba(229, 9, 20, 0.45);
     }
 
     .btn-success {
-      background-color: #2ecc71;
-      color: white;
+      background-color: #00ff66;
+      color: #050505;
+      box-shadow: 0 4px 12px rgba(0, 255, 102, 0.15);
     }
 
     .btn-success:hover {
-      background-color: #27ae60;
+      background-color: #26ff7d;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+      box-shadow: 0 4px 18px rgba(0, 255, 102, 0.35);
     }
 
     .btn-warning {
-      background-color: #f39c12;
-      color: white;
+      background-color: #ff9900;
+      color: #050505;
+      box-shadow: 0 4px 12px rgba(255, 153, 0, 0.15);
     }
 
     .btn-warning:hover {
-      background-color: #e67e22;
+      background-color: #ffaa22;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+      box-shadow: 0 4px 18px rgba(255, 153, 0, 0.35);
     }
 
     .btn-danger {
-      background-color: #e74c3c;
+      background-color: #ff3333;
       color: white;
+      box-shadow: 0 4px 12px rgba(255, 51, 51, 0.15);
     }
 
     .btn-danger:hover {
-      background-color: #c0392b;
+      background-color: #ff5555;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+      box-shadow: 0 4px 18px rgba(255, 51, 51, 0.35);
     }
 
     .btn-info {
-      background-color: #3498db;
-      color: white;
+      background-color: #00f0ff;
+      color: #050505;
+      box-shadow: 0 4px 12px rgba(0, 240, 255, 0.15);
     }
 
     .btn-info:hover {
-      background-color: #2980b9;
+      background-color: #33f3ff;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+      box-shadow: 0 4px 18px rgba(0, 240, 255, 0.35);
     }
 
     .status {
-      margin-top: 10px;
+      margin-top: 15px;
       padding: 10px;
-      border-radius: 5px;
+      border-radius: 6px;
       font-size: 13px;
       text-align: center;
+      font-family: 'Share Tech Mono', monospace;
+      letter-spacing: 0.5px;
     }
 
     .status.success {
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
+      background-color: rgba(0, 255, 102, 0.1);
+      color: #00ff66;
+      border: 1px solid rgba(0, 255, 102, 0.25);
     }
 
     .status.error {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
+      background-color: rgba(255, 51, 51, 0.1);
+      color: #ff3333;
+      border: 1px solid rgba(255, 51, 51, 0.25);
     }
 
     .status.info {
-      background-color: #d1ecf1;
-      color: #0c5460;
-      border: 1px solid #bee5eb;
+      background-color: rgba(0, 240, 255, 0.08);
+      color: #00f0ff;
+      border: 1px solid rgba(0, 240, 255, 0.2);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      margin-top: 15px;
       font-size: 13px;
+      font-family: 'Share Tech Mono', monospace;
     }
 
     th, td {
-      padding: 10px;
+      padding: 12px;
       text-align: left;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     th {
-      background-color: #667eea;
-      color: white;
+      background-color: rgba(229, 9, 20, 0.15);
+      color: #ff3333;
       font-weight: 600;
+      border: 1px solid rgba(229, 9, 20, 0.25);
+      letter-spacing: 1px;
+    }
+
+    tr {
+      transition: background 0.2s;
     }
 
     tr:hover {
-      background-color: #f5f5f5;
+      background-color: rgba(229, 9, 20, 0.04);
     }
 
     td.clicksCell {
       cursor: text;
-      color: #667eea;
+      color: #00f0ff;
       text-decoration: underline;
     }
 
     button.deleteBtn {
-      background-color: #e74c3c;
-      color: white;
-      border: none;
+      background-color: rgba(255, 51, 51, 0.1);
+      border: 1px solid rgba(255, 51, 51, 0.4);
+      color: #ff5555;
       padding: 5px 10px;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 11px;
       width: auto;
     }
 
     button.deleteBtn:hover {
-      background-color: #c0392b;
+      background-color: #ff3333;
+      color: white;
     }
 
     .button-group {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 12px;
+      margin-bottom: 12px;
     }
 
     .button-group.full {
@@ -240,56 +305,71 @@
     .stats {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 12px;
       margin-bottom: 15px;
     }
 
     .stat-box {
-      background-color: #f0f0f0;
-      padding: 10px;
-      border-radius: 5px;
+      background-color: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 12px;
+      border-radius: 6px;
       text-align: center;
     }
 
     .stat-box .label {
-      font-size: 12px;
-      color: #666;
+      font-size: 11px;
+      color: #888;
       margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .stat-box .value {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: bold;
-      color: #667eea;
+      color: #e50914;
+      font-family: 'Share Tech Mono', monospace;
     }
 
     .section-divider {
       margin-top: 30px;
-      padding-top: 20px;
-      border-top: 2px solid rgba(102, 126, 234, 0.2);
+      padding-top: 25px;
+      border-top: 2px solid rgba(229, 9, 20, 0.2);
     }
 
     .tabs {
       display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
+      gap: 12px;
+      margin-bottom: 25px;
       flex-wrap: wrap;
     }
 
     .tab-btn {
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
+      padding: 12px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
       cursor: pointer;
-      background-color: rgba(255, 255, 255, 0.7);
-      color: #333;
+      background-color: rgba(255, 255, 255, 0.02);
+      color: #aaa;
       font-weight: 600;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      letter-spacing: 1px;
       transition: all 0.3s;
     }
 
+    .tab-btn:hover {
+      color: #fff;
+      background: rgba(229, 9, 20, 0.1);
+      border-color: rgba(229, 9, 20, 0.25);
+    }
+
     .tab-btn.active {
-      background-color: #667eea;
+      background-color: #e50914;
       color: white;
+      border-color: #e50914;
+      box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
     }
 
     .tab-content {
@@ -306,7 +386,8 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
       display: none;
       align-items: center;
       justify-content: center;
@@ -318,24 +399,28 @@
     }
 
     .modal-content {
-      background: white;
+      background: rgba(14, 16, 22, 0.95);
+      border: 1px solid rgba(229, 9, 20, 0.4);
       padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      box-shadow: 0 0 35px rgba(229, 9, 20, 0.3);
       max-width: 500px;
       width: 90%;
+      color: #fff;
     }
 
     .modal-content h2 {
-      color: #667eea;
+      color: #ff3333;
       margin-bottom: 20px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 18px;
     }
 
     .close-btn {
       float: right;
       font-size: 24px;
       cursor: pointer;
-      color: #999;
+      color: #666;
       background: none;
       border: none;
       width: auto;
@@ -343,16 +428,411 @@
     }
 
     .close-btn:hover {
-      color: #333;
+      color: #fff;
+    }
+
+    /* Admin Chat Styling */
+    .admin-chat-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .admin-chat-messages {
+      height: 400px;
+      background: rgba(5, 5, 5, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+      text-align: left;
+    }
+
+    .admin-chat-message {
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      border-left: 3px solid rgba(255, 255, 255, 0.1);
+      font-size: 13px;
+      font-family: 'Share Tech Mono', monospace;
+      line-height: 1.4;
+      animation: fadeInMsg 0.25s ease-out;
+      word-break: break-word;
+    }
+
+    .admin-chat-message.admin-author {
+      background: rgba(229, 9, 20, 0.08);
+      border-left-color: #e50914;
+      box-shadow: inset 0 0 10px rgba(229, 9, 20, 0.05);
+    }
+
+    .admin-chat-message.user-author {
+      border-left-color: #ffcc00;
+    }
+
+    .admin-chat-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+      font-size: 11px;
+      color: #888;
+    }
+
+    .admin-chat-flag {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 1px 4px;
+      border-radius: 3px;
+      color: #ccc;
+    }
+
+    .admin-chat-user {
+      font-weight: bold;
+      color: #00f0ff;
+    }
+
+    .admin-chat-user.admin-highlight {
+      color: #ff3333;
+      text-shadow: 0 0 5px rgba(255, 51, 51, 0.5);
+    }
+
+    .admin-chat-text {
+      color: #fff;
+    }
+
+    .admin-chat-input-area {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .admin-chat-input-area input {
+      flex-grow: 1;
+    }
+
+    .admin-chat-options {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      align-items: center;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: #aaa;
+      text-align: left;
+    }
+
+    .admin-chat-options label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      margin-bottom: 0;
+    }
+
+    .admin-chat-options input[type="checkbox"] {
+      width: auto;
+      cursor: pointer;
+    }
+
+
+    /* Cyberpunk Lockscreen Styling */
+    #admin-lockscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, #0e0f14 0%, #06070a 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100000;
+      color: #fff;
+      font-family: 'Share Tech Mono', 'Orbitron', monospace;
+      box-sizing: border-box;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    #admin-lockscreen::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 4px, 6px 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .lock-panel {
+      width: 440px;
+      max-width: 100%;
+      background: rgba(13, 15, 22, 0.85);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(229, 9, 20, 0.35);
+      border-radius: 16px;
+      padding: 40px 30px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(229, 9, 20, 0.15);
+      text-align: center;
+      position: relative;
+      z-index: 5;
+      transform: scale(1);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .lock-panel::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #e50914, #ff5555, #e50914);
+      animation: scan-glow 3s linear infinite;
+    }
+
+    @keyframes scan-glow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    .cyber-header {
+      margin-bottom: 30px;
+    }
+
+    .cyber-logo {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      color: #e50914;
+      text-shadow: 0 0 15px rgba(229, 9, 20, 0.6);
+      animation: logo-flicker 2s infinite alternate;
+    }
+
+    @keyframes logo-flicker {
+      0% { opacity: 0.8; }
+      100% { opacity: 1; }
+    }
+
+    .cyber-header h2 {
+      font-size: 20px;
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .system-status {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      color: #ff3333;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(229, 9, 20, 0.1);
+      border-radius: 20px;
+      border: 1px solid rgba(229, 9, 20, 0.2);
+    }
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #ff3333;
+      box-shadow: 0 0 8px #ff3333;
+      animation: pulse-red-dot 1s infinite alternate;
+    }
+
+    @keyframes pulse-red-dot {
+      0% { opacity: 0.3; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .warning-text {
+      font-size: 11px;
+      color: #888;
+      letter-spacing: 1px;
+      margin-bottom: 25px;
+      text-transform: uppercase;
+    }
+
+    .input-wrapper {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-wrapper .input-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: 14px 15px 14px 45px;
+      background: rgba(5, 5, 5, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 15px;
+      letter-spacing: 4px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .input-wrapper input:focus {
+      outline: none;
+      border-color: #e50914;
+      box-shadow: 0 0 15px rgba(229, 9, 20, 0.25), inset 0 0 5px rgba(229, 9, 20, 0.1);
+    }
+
+    .cyber-btn {
+      width: 100%;
+      padding: 14px;
+      background: #e50914;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 0 15px rgba(229, 9, 20, 0.3);
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .cyber-btn:hover {
+      background: #ff222d;
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(229, 9, 20, 0.5);
+    }
+
+    .feedback-msg {
+      margin-top: 20px;
+      font-size: 12px;
+      letter-spacing: 1px;
+      min-height: 18px;
+      transition: all 0.3s;
+    }
+
+    .feedback-msg.error {
+      color: #ff3333;
+      text-shadow: 0 0 8px rgba(255, 51, 51, 0.4);
+      animation: blink-error 0.5s infinite alternate;
+    }
+
+    @keyframes blink-error {
+      0% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    .feedback-msg.success {
+      color: #00ff66;
+      text-shadow: 0 0 8px rgba(0, 255, 102, 0.4);
+    }
+
+    .return-link {
+      display: inline-block;
+      margin-top: 30px;
+      color: #888;
+      text-decoration: none;
+      font-size: 12px;
+      transition: all 0.3s;
+      letter-spacing: 1px;
+    }
+
+    .return-link:hover {
+      color: #fff;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+    }
+
+    /* Shake animation on invalid key */
+    .shake-anim {
+      animation: lock-shake 0.5s ease-in-out;
+    }
+
+    @keyframes lock-shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+      20%, 40%, 60%, 80% { transform: translateX(8px); }
+    }
+
+    /* Logout Button Styling in Dashboard Header */
+    .header-logout-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: -15px;
+    }
+    
+    .btn-logout {
+      padding: 8px 16px;
+      background: rgba(229, 9, 20, 0.15);
+      border: 1px solid rgba(229, 9, 20, 0.4);
+      color: #ff5555;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: auto;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-logout:hover {
+      background: #e50914;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(229, 9, 20, 0.4);
+      transform: translateY(-1px);
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>🎮 Admin Control Panel</h1>
-      <p>Test all game features and manage gameplay</p>
+  <!-- Cyberpunk Access Lockscreen -->
+  <div id="admin-lockscreen">
+    <div class="lock-panel">
+      <div class="cyber-header">
+        <div class="cyber-logo">⚡</div>
+        <h2>SYS_CONTROL // GATEWAY</h2>
+        <div class="system-status"><span class="pulse-dot"></span> ACCESS RESTRICTED</div>
+      </div>
+      <div class="cyber-body">
+        <p class="warning-text">UNAUTHORIZED ATTEMPTS ARE LOGGED</p>
+        <div class="input-wrapper">
+          <span class="input-icon">🔑</span>
+          <input type="password" id="adminPasswordInput" placeholder="ENTER ACCESS KEY..." autocomplete="off">
+        </div>
+        <button class="cyber-btn" onclick="tryUnlock()">DECRYPT DATA LINK</button>
+        <div id="loginFeedback" class="feedback-msg"></div>
+        <a href="index.html" class="return-link">← RETURN TO GAME HUB</a>
+      </div>
     </div>
+  </div>
+
+  <!-- Authenticated Dashboard -->
+  <div id="adminDashboard" style="display: none;">
+    <div class="container">
+      <div class="header">
+        <div class="header-logout-row">
+          <button class="btn-logout" onclick="adminLogout()">🔒 TERMINATE SESSION</button>
+        </div>
+        <h1>🎮 Admin Control Panel</h1>
+        <p>Test all game features and manage gameplay</p>
+      </div>
 
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('overview')">📊 Overview</button>
@@ -362,6 +842,7 @@
       <button class="tab-btn" onclick="switchTab('shield')">🛡️ Shields</button>
       <button class="tab-btn" onclick="switchTab('countries')">🌍 Countries</button>
       <button class="tab-btn" onclick="switchTab('testing')">🧪 Testing Tools</button>
+      <button class="tab-btn" onclick="switchTab('chat')">💬 Command Chat</button>
     </div>
 
     <!-- OVERVIEW TAB -->
@@ -369,17 +850,37 @@
       <div class="grid">
         <div class="card">
           <h2>Server Status</h2>
-          <div class="stats">
-            <div class="stat-box">
-              <div class="label">Connected Players</div>
-              <div class="value" id="connectedPlayers">-</div>
+          <div class="stats" style="grid-template-columns: 1fr; gap: 10px;">
+            <div class="stat-box" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px;">
+              <span class="label" style="margin-bottom: 0;">Active Connections</span>
+              <span class="value" id="connectedPlayers" style="font-size: 20px; font-weight: bold; color: #667eea;">-</span>
             </div>
-            <div class="stat-box">
-              <div class="label">Active Countries</div>
-              <div class="value" id="activeCountries">-</div>
+            <div class="stat-box" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px;">
+              <span class="label" style="margin-bottom: 0;">Active Countries</span>
+              <span class="value" id="activeCountries" style="font-size: 20px; font-weight: bold; color: #667eea;">-</span>
+            </div>
+            <div class="stat-box" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px;">
+              <span class="label" style="margin-bottom: 0;">Twitch Stream</span>
+              <span class="value" id="twitchStreamStatus" style="font-size: 20px; font-weight: bold;">-</span>
             </div>
           </div>
-          <button class="btn-info" onclick="checkServerStatus()">🔄 Refresh Status</button>
+          <button class="btn-info" onclick="checkServerStatus()" style="margin-top: 15px;">🔄 Refresh Status</button>
+        </div>
+
+        <div class="card">
+          <h2>📡 Broadcast & Stream</h2>
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label>Twitch Stream Simulator</label>
+            <div class="button-group">
+              <button class="btn-success" onclick="setTwitchLive(true)">Go LIVE 🔴</button>
+              <button class="btn-danger" onclick="setTwitchLive(false)">Go Offline ⚪</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Global Server Event</label>
+            <button class="btn-warning" onclick="triggerGlobalGoldenSpawn()">✨ Broadcast Golden Bunbat Spawn</button>
+          </div>
+          <div id="broadcastStatus" class="status"></div>
         </div>
 
         <div class="card">
@@ -653,6 +1154,31 @@
         </div>
       </div>
     </div>
+
+    <!-- COMMAND CHAT TAB -->
+    <div id="chat" class="tab-content">
+      <div class="card">
+        <h2>💬 Command Center Global Chat</h2>
+        <div class="admin-chat-options">
+          <label>
+            <input type="checkbox" id="sendAsAdminCheck" checked>
+            Send as Official Admin
+          </label>
+          <span style="color: rgba(255, 255, 255, 0.15)">|</span>
+          <span>Role: <strong style="color: #ff3333;">SYS_ADMIN</strong></span>
+        </div>
+        <div class="admin-chat-container">
+          <div class="admin-chat-messages" id="adminChatMessages">
+            <div style="color: #888; text-align: center; margin-top: 150px; font-family: 'Share Tech Mono', monospace;">Connecting to Secure Link...</div>
+          </div>
+          <div class="admin-chat-input-area">
+            <input type="text" id="adminChatInput" placeholder="TRANSMIT ANNOUNCEMENT..." maxlength="100">
+            <button class="btn-primary" onclick="sendAdminChatMessage()" style="width: auto; padding: 12px 30px;">SEND</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Confirmation Modal -->
@@ -667,10 +1193,107 @@
       </div>
     </div>
   </div>
+  </div> <!-- Close adminDashboard -->
 
   <script>
-    const ADMIN_PASSWORD = "supersecret123123ret123123";
+    let ADMIN_PASSWORD = sessionStorage.getItem('admin_auth') || '';
     let pendingAction = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      checkSessionAuth();
+      
+      const pwdInput = document.getElementById("adminPasswordInput");
+      if (pwdInput) {
+        pwdInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            tryUnlock();
+          }
+        });
+      }
+    });
+
+    async function checkSessionAuth() {
+      if (ADMIN_PASSWORD) {
+        try {
+          const res = await fetch(`/api/admin/verify?password=${ADMIN_PASSWORD}`);
+          if (res.ok) {
+            showDashboard();
+            return;
+          }
+        } catch (e) {
+          console.error("Auth verification failed", e);
+        }
+      }
+      showLockscreen();
+    }
+
+    function showDashboard() {
+      document.getElementById('admin-lockscreen').style.display = 'none';
+      document.getElementById('adminDashboard').style.display = 'block';
+      loadCountries();
+      checkServerStatus();
+    }
+
+    function showLockscreen() {
+      document.getElementById('admin-lockscreen').style.display = 'flex';
+      document.getElementById('adminDashboard').style.display = 'none';
+      const input = document.getElementById('adminPasswordInput');
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    async function tryUnlock() {
+      const input = document.getElementById('adminPasswordInput');
+      const password = input.value;
+      const feedback = document.getElementById('loginFeedback');
+      
+      if (!password) {
+        feedback.className = 'feedback-msg error';
+        feedback.innerHTML = 'PLEASE ENTER ACCESS KEY';
+        return;
+      }
+      
+      feedback.className = 'feedback-msg';
+      feedback.innerHTML = 'VERIFYING SECURITY CLEARANCE...';
+      
+      try {
+        const res = await fetch(`/api/admin/verify?password=${password}`);
+        if (res.ok) {
+          feedback.className = 'feedback-msg success';
+          feedback.innerHTML = 'ACCESS GRANTED. INITIALIZING SECURE LINK...';
+          
+          ADMIN_PASSWORD = password;
+          sessionStorage.setItem('admin_auth', password);
+          
+          setTimeout(() => {
+            showDashboard();
+            feedback.innerHTML = '';
+          }, 1000);
+        } else {
+          throw new Error('Invalid key');
+        }
+      } catch (err) {
+        feedback.className = 'feedback-msg error';
+        feedback.innerHTML = 'ACCESS DENIED: KEY INVALID';
+        
+        const lockPanel = document.querySelector('.lock-panel');
+        lockPanel.classList.add('shake-anim');
+        setTimeout(() => {
+          lockPanel.classList.remove('shake-anim');
+        }, 500);
+        
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    function adminLogout() {
+      sessionStorage.removeItem('admin_auth');
+      ADMIN_PASSWORD = '';
+      showLockscreen();
+    }
 
     function switchTab(tabName) {
       // Hide all tab contents
@@ -691,12 +1314,15 @@
       // Load content based on tab
       if (tabName === 'countries') {
         loadCountries();
-          startCountryPolling();
+        startCountryPolling();
       } else if (tabName === 'overview') {
         checkServerStatus();
-          stopCountryPolling();
-        } else {
-          stopCountryPolling();
+        stopCountryPolling();
+      } else if (tabName === 'chat') {
+        initChatWS();
+        stopCountryPolling();
+      } else {
+        stopCountryPolling();
       }
     }
 
@@ -1137,12 +1763,55 @@
 
     async function checkServerStatus() {
       try {
-        const res = await fetch('/paises');
-        const countries = await res.json();
-        document.getElementById('connectedPlayers').textContent = '~' + (countries.length * 10); // Estimate
+        const resPaises = await fetch('/paises');
+        const countries = await resPaises.json();
         document.getElementById('activeCountries').textContent = countries.length;
+
+        // Fetch real-time active connections and stream status
+        const resStats = await fetch(`/api/admin/server-stats?password=${ADMIN_PASSWORD}`);
+        if (resStats.ok) {
+          const stats = await resStats.json();
+          document.getElementById('connectedPlayers').textContent = stats.activeSockets;
+          
+          const statusText = stats.twitchLive ? 'LIVE 🔴' : 'OFFLINE ⚪';
+          const statusEl = document.getElementById('twitchStreamStatus');
+          statusEl.textContent = statusText;
+          statusEl.style.color = stats.twitchLive ? '#00ff66' : '#888';
+        }
       } catch (err) {
         console.error('Error checking server status:', err);
+      }
+    }
+
+    async function setTwitchLive(isLiveVal) {
+      try {
+        const res = await fetch(`/api/admin/set-live?password=${ADMIN_PASSWORD}&live=${isLiveVal}`);
+        if (res.ok) {
+          const text = await res.text();
+          showStatus('broadcastStatus', `✓ ${text}`, 'success');
+          checkServerStatus();
+        } else {
+          showStatus('broadcastStatus', `✗ Error setting stream status`, 'error');
+        }
+      } catch (err) {
+        showStatus('broadcastStatus', `✗ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function triggerGlobalGoldenSpawn() {
+      try {
+        const res = await fetch('/api/golden/spawn', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          showStatus('broadcastStatus', `✓ ${data.message}`, 'success');
+        } else {
+          showStatus('broadcastStatus', `✗ Failed to broadcast spawn`, 'error');
+        }
+      } catch (err) {
+        showStatus('broadcastStatus', `✗ Error: ${err.message}`, 'error');
       }
     }
 
@@ -1170,8 +1839,148 @@
       }
     }
 
-    // Load countries on page load
-    loadCountries();
+    // ==================== WEB SOCKET ADMIN CHAT ====================
+    let chatWs = null;
+    
+    function getFlagEmoji(countryCode) {
+      if (!countryCode || countryCode === 'XX') return '🌍';
+      const codePoints = countryCode
+        .toUpperCase()
+        .split('')
+        .map(char => 127397 + char.charCodeAt(0));
+      try {
+        return String.fromCodePoint(...codePoints);
+      } catch (e) {
+        return countryCode;
+      }
+    }
+
+    function formatTime(timestamp) {
+      const date = new Date(timestamp);
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${hours}:${minutes}`;
+    }
+
+    function initChatWS() {
+      if (chatWs && chatWs.readyState === WebSocket.OPEN) return;
+
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      chatWs = new WebSocket(`${protocol}//${window.location.host}/`);
+
+      chatWs.onopen = () => {
+        console.log('Admin WebSocket Chat connected');
+        const chatBox = document.getElementById('adminChatMessages');
+        chatBox.innerHTML = '<div style="color: #00ff66; text-align: center; padding: 15px; font-family: \'Share Tech Mono\', monospace;">✓ SECURE COMMS LINK LINKED.</div>';
+      };
+
+      chatWs.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'chatInit') {
+            const globalMsgs = data.data.global || [];
+            const chatBox = document.getElementById('adminChatMessages');
+            chatBox.innerHTML = '';
+            globalMsgs.forEach(msg => appendAdminPanelMessage(msg, false));
+            scrollChatToBottom();
+          } else if (data.type === 'chatBroadcast') {
+            const msg = data.data;
+            if (msg.channel === 'global') {
+              appendAdminPanelMessage(msg, true);
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      };
+
+      chatWs.onclose = () => {
+        console.log('Admin WebSocket Chat disconnected. Reconnecting...');
+        setTimeout(initChatWS, 3000);
+      };
+    }
+
+    function appendAdminPanelMessage(msg, scroll = true) {
+      const chatBox = document.getElementById('adminChatMessages');
+      if (!chatBox) return;
+
+      const msgEl = document.createElement('div');
+      msgEl.className = 'admin-chat-message';
+      if (msg.isAdmin) {
+        msgEl.classList.add('admin-author');
+      } else {
+        msgEl.classList.add('user-author');
+      }
+
+      const timeStr = formatTime(msg.timestamp);
+      const flagStr = getFlagEmoji(msg.country);
+      const adminBadge = msg.isAdmin ? '<span class="admin-badge" style="background:#e50914; color:#fff; font-size:9px; padding:1px 4px; border-radius:3px; font-weight:bold; margin-right:4px;">ADMIN</span>' : '';
+      const userClass = msg.isAdmin ? 'admin-chat-user admin-highlight' : 'admin-chat-user';
+
+      msgEl.innerHTML = `
+        <div class="admin-chat-meta">
+          <span>[${timeStr}]</span>
+          <span class="admin-chat-flag">${flagStr} ${msg.country}</span>
+          ${adminBadge}
+          <span class="${userClass}">${msg.nickname}</span>
+        </div>
+        <div class="admin-chat-text">${msg.text}</div>
+      `;
+
+      chatBox.appendChild(msgEl);
+      if (scroll) scrollChatToBottom();
+    }
+
+    function scrollChatToBottom() {
+      const chatBox = document.getElementById('adminChatMessages');
+      if (chatBox) {
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    }
+
+    function sendAdminChatMessage() {
+      const input = document.getElementById('adminChatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      if (!chatWs || chatWs.readyState !== WebSocket.OPEN) {
+        alert('WebSocket is not connected');
+        return;
+      }
+
+      const sendAsAdmin = document.getElementById('sendAsAdminCheck').checked;
+      
+      const payload = {
+        type: 'chatMessage',
+        data: {
+          channel: 'global',
+          text: text,
+          nickname: sendAsAdmin ? 'SYS_ADMIN' : 'Anonymous'
+        }
+      };
+
+      if (sendAsAdmin) {
+        payload.data.password = ADMIN_PASSWORD;
+      }
+
+      chatWs.send(JSON.stringify(payload));
+      input.value = '';
+      input.focus();
+    }
+
+    // Attach listeners on DOMContentLoaded
+    document.addEventListener("DOMContentLoaded", () => {
+      const chatInput = document.getElementById("adminChatInput");
+      if (chatInput) {
+        chatInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            sendAdminChatMessage();
+          }
+        });
+      }
+    });
+
+    // Session is checked on DOMContentLoaded
   </script>
 </body>
 </html>

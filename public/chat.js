@@ -160,18 +160,24 @@ export const Chat = {
 
     const msgEl = document.createElement('div');
     msgEl.className = 'chat-message';
-    if (msg.nickname === nickname && msg.country === userCountry) {
+    if (msg.isAdmin) {
+      msgEl.classList.add('admin-message');
+    } else if (msg.nickname === nickname && msg.country === userCountry) {
       msgEl.classList.add('my-message');
     }
 
     const timeStr = formatTime(msg.timestamp);
     const flagStr = getFlagEmoji(msg.country);
 
+    const adminBadge = msg.isAdmin ? `<span class="admin-badge">ADMIN</span>` : '';
+    const userClass = msg.isAdmin ? 'chat-user admin-user' : 'chat-user';
+
     msgEl.innerHTML = `
       <span class="chat-meta">
         <span class="chat-time">[${timeStr}]</span>
         <span class="chat-flag" title="${msg.country}">${flagStr} ${msg.country}</span>
-        <span class="chat-user">${msg.nickname}:</span>
+        ${adminBadge}
+        <span class="${userClass}">${msg.nickname}:</span>
       </span>
       <span class="chat-text">${msg.text}</span>
     `;

@@ -469,6 +469,39 @@ router.post('/admin/full-reset', async (req, res) => {
   }
 });
 
+/**
+ * Verify admin password
+ * GET /api/admin/verify?password=...
+ */
+router.get('/admin/verify', (req, res) => {
+  const password = req.query.password;
+  const ADMIN_PASSWORD = "supersecret123123ret123123";
+  if (password === ADMIN_PASSWORD) {
+    res.json({ success: true });
+  } else {
+    res.status(403).json({ error: 'Invalid password' });
+  }
+});
+
+/**
+ * Get real-time server statistics (active sockets and twitch status)
+ * GET /api/admin/server-stats?password=...
+ */
+router.get('/admin/server-stats', (req, res) => {
+  const password = req.query.password;
+  const ADMIN_PASSWORD = "supersecret123123ret123123";
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(403).json({ error: 'Unauthorized' });
+  }
+
+  const twitchService = require('../services/twitchService');
+  const activeSockets = global.wss ? global.wss.clients.size : 0;
+  res.json({
+    activeSockets,
+    twitchLive: twitchService.getStreamStatus()
+  });
+});
+
 // ==================== SHOP ROUTES ====================
 
 /**
