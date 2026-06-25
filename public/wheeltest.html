@@ -391,52 +391,8 @@
       color: #888;
     }
 
-    /* Mobile Portrait Responsive Layout */
-    @media (max-width: 768px) {
-      body {
+    body {
         background: radial-gradient(circle at center, #1a0203 0%, var(--bg-color) 100%);
-      }
-
-      .app-container {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        display: flex;
-        flex-direction: column;
-        width: 440px;
-        height: 920px;
-        gap: 20px;
-        padding: 20px 10px;
-        box-sizing: border-box;
-      }
-
-      .player-deck {
-        position: relative;
-        top: auto;
-        right: auto;
-        transform: none;
-        width: 100%;
-        max-width: 420px;
-        order: 1;
-      }
-
-      .turntable-container {
-        order: 2;
-        height: 450px;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-      }
-
-      .wheel-wrapper {
-        position: relative;
-        bottom: 0;
-        top: 0;
-        left: -35px;
-        transform: scale(0.65);
-        transform-origin: left top;
-      }
     }
   </style>
 </head>
@@ -950,57 +906,29 @@
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     
-    if (viewportWidth <= 768) {
-      // Clear inline positioning styles for mobile portrait, let CSS handle it
-      wheelWrapper.style.position = '';
-      wheelWrapper.style.top = '';
-      wheelWrapper.style.left = '';
-      wheelWrapper.style.transform = '';
-      wheelWrapper.style.transformOrigin = '';
-      
-      playerDeck.style.position = '';
-      playerDeck.style.top = '';
-      playerDeck.style.left = '';
-      playerDeck.style.right = '';
-      playerDeck.style.transform = '';
-      playerDeck.style.transformOrigin = '';
-      
-      const mobileBaseWidth = 440;
-      const mobileBaseHeight = 920;
-      
-      const scaleX = (viewportWidth * 0.95) / mobileBaseWidth;
-      const scaleY = (viewportHeight * 0.95) / mobileBaseHeight;
-      const scale = Math.min(scaleX, scaleY, 1.0);
-      
-      container.style.position = 'absolute';
-      container.style.top = '50%';
-      container.style.left = '50%';
-      container.style.transform = `translate(-50%, -50%) scale(${scale})`;
-      return;
-    }
-    
-    // Desktop View - absolute/fixed viewport fill layout
+    // Side-by-Side View - absolute/fixed viewport fill layout
     container.style.position = 'static';
     container.style.transform = 'none';
     
+    const baseWidth = 860; // 350px (wheel) + 30px (gap) + 480px (deck)
     const wheelBaseHeight = 700;
-    const deckBaseHeight = 600; // Increased base height for larger layout
+    const deckBaseHeight = 600;
+    const maxBaseHeight = Math.max(wheelBaseHeight, deckBaseHeight);
     
-    let wheelScale = (viewportHeight * 0.9) / wheelBaseHeight;
-    let deckScale = (viewportHeight * 0.9) / deckBaseHeight;
-    
-    wheelScale = Math.min(wheelScale, 1.15);
-    deckScale = Math.min(deckScale, 1.15);
+    // Calculate scaling to fit both screen width and screen height
+    const scaleWidth = (viewportWidth * 0.95) / baseWidth;
+    const scaleHeight = (viewportHeight * 0.9) / maxBaseHeight;
+    const scale = Math.min(scaleWidth, scaleHeight, 1.15); // Capped at 1.15x
     
     // Position Wheel EXACTLY on the left border of the screen, centered vertically
     wheelWrapper.style.position = 'fixed';
     wheelWrapper.style.top = '50%';
     wheelWrapper.style.left = '0';
-    wheelWrapper.style.transform = `translateY(-50%) scale(${wheelScale})`;
+    wheelWrapper.style.transform = `translateY(-50%) scale(${scale})`;
     wheelWrapper.style.transformOrigin = 'left center';
     
     // Center Player Deck in the remaining screen space on the right of the vinyl
-    const discRightEdge = 350 * wheelScale;
+    const discRightEdge = 350 * scale;
     const remainingSpace = viewportWidth - discRightEdge;
     const deckCenter = discRightEdge + (remainingSpace / 2);
     
@@ -1008,7 +936,7 @@
     playerDeck.style.top = '50%';
     playerDeck.style.left = `${deckCenter}px`;
     playerDeck.style.right = 'auto';
-    playerDeck.style.transform = `translate(-50%, -50%) scale(${deckScale})`;
+    playerDeck.style.transform = `translate(-50%, -50%) scale(${scale})`;
     playerDeck.style.transformOrigin = 'center center';
   }
 
